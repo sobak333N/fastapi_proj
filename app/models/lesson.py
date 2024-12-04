@@ -1,0 +1,42 @@
+# models/lesson.py
+from sqlalchemy import (
+    Column, Integer, 
+    String, Boolean, 
+    ForeignKey, Index,
+)
+from sqlalchemy.orm import relationship
+from enum import Enum as PyEnum
+from app.core.db import Base
+
+
+class Lesson(Base):
+    __tablename__ = 'lessons'
+    
+    lesson_id = Column(Integer, primary_key=True)
+    course_id = Column(Integer, ForeignKey('course.course_id'), nullable=False)
+    lesson_materials = Column(String, nullable=True)
+
+    course = relationship("Course", back_populates="lessons")
+
+    __table_args__ = (
+        Index('idx_lessons_lesson_id', 'lesson_id'),
+        Index('idx_lessons_course_id', 'course_id'),
+    )
+
+
+class StudentLesson(Base):
+    __tablename__ = 'student_lesson'
+    
+    student_lesson_id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey('students.student_id'), nullable=False)
+    lesson_id = Column(Integer, ForeignKey('lessons.lesson_id'), nullable=False)
+    done = Column(Boolean, default=False)
+    result = Column(Integer, nullable=True)
+
+    student = relationship("Student", back_populates="student_lessons")
+    lesson = relationship("Lesson", back_populates="student_lessons")
+
+    __table_args__ = (
+        Index('idx_student_lesson_student_id', 'student_id'),
+        Index('idx_student_lesson_lesson_id', 'lesson_id'),
+    )
