@@ -11,8 +11,8 @@ from app.core.db import Base
 
 
 class Roles(PyEnum):
-    active = "student"
-    inactive = "instructor"
+    student = "student"
+    instructor = "instructor"
     admin = "admin"
 
 

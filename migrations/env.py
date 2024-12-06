@@ -13,6 +13,7 @@ from app.models import(
     Course, StudentCourse,
     Lesson, StudentLesson,
     LessonTask, StudentLessonTask, 
+    RefreshToken,
 )
 
 config = context.config

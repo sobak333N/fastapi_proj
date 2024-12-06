@@ -5,7 +5,7 @@ from .student import Student
 from .course import Course, StudentCourse
 from .lesson import Lesson, StudentLesson
 from .lesson_task import LessonTask, StudentLessonTask 
-
+from .refresh_tokens import RefreshToken
 
 
 

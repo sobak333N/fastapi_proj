@@ -1,1 +1,20 @@
-.env
+# Игнорирование файлов с кэшами Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Игнорирование миграций Alembic
+migrations/__pycache__/
+migrations/versions/*.pyc
+
+# Игнорирование файлов и директорий в app, которые относятся к кэшу и временным файлам
+app/__pycache__/
+app/models/__pycache__/
+app/auth/
+
+# Игнорирование файла ошибок (если он не нужен в репозитории)
+app/errors.py
+
+# Игнорирование всех прочих файлов миграций, если они не нужны в репозитории
+migrations/versions/*.py
