@@ -6,11 +6,11 @@ from sqlalchemy import (
     Index
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from enum import Enum as PyEnum
 from app.core.db import Base
 
-
-class Roles(PyEnum):
+class Roles2(PyEnum):
     student = "student"
     instructor = "instructor"
     admin = "admin"
@@ -21,15 +21,16 @@ class User(Base):
     user_id = Column(Integer, primary_key=True)
     email = Column(String, nullable=False)
     first_name = Column(String, nullable=False)
-    second_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=False)
+    second_name = Column(String, nullable=True)
     birthdate = Column(DateTime, nullable=True)
     password_hash = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    role = Column(Enum(Roles))
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    role = Column(Enum(Roles2))
 
     student = relationship('Student', back_populates='user', uselist=False) 
     instructor = relationship('Instructor', back_populates='user', uselist=False) 
+    refresh_token = relationship('RefreshToken', back_populates='user', lazy='noload') 
 
     __table_args__ = (
         Index('idx_user_id', 'user_id'),

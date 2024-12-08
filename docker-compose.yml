@@ -17,11 +17,13 @@ services:
       - redis
     networks:
       - app-network
+      # gunicorn --workers $((KERNEL_AMOUNTS*2+1)) -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000
+      # uvicorn app.main:app --host 0.0.0.0 --port 8000
     command: >
       bash -c " 
       alembic upgrade head && 
       KERNEL_AMOUNTS=$(nproc) &&  
-      gunicorn --workers $((KERNEL_AMOUNTS*2+1)) -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000
+      uvicorn app.main:app --host 0.0.0.0 --port 8000
       "
 
   nginx:
@@ -44,7 +46,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - ${POSTGRES_OUTER_PORT}:5432
+      - ${POSTGRES_OUTER_PORT}:${POSTGRES_INNER_PORT}
     networks:
       - app-network
 
@@ -52,6 +54,8 @@ services:
     image: redis:alpine
     networks:
       - app-network
+    ports:
+      - ${REDIS_OUTER_PORT}:${REDIS_INNER_PORT}
 
 volumes:
   db_data:

@@ -10,11 +10,6 @@ from enum import Enum as PyEnum
 from app.core.db import Base
 
 
-class AcademicDegree(PyEnum):
-    bachelor = "bachelor"
-    master = "master"
-    doctorate = "doctorate"
-
 
 class RefreshToken(Base):
     __tablename__ = 'refresh_token'

@@ -3,12 +3,11 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from app.config import Config
 
 Base = declarative_base()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres")
-
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(Config.DATABASE_URL, echo=True)
 
 SessionLocal = sessionmaker(
     bind=engine,
@@ -17,24 +16,7 @@ SessionLocal = sessionmaker(
 )
 
 
-@asynccontextmanager
-async def get_db():
-    session: AsyncSession = SessionLocal()
-    try:
+async def get_db() -> AsyncSession:
+    async with SessionLocal() as session:
         yield session
-    finally:
-        await session.close()
 
-
-@asynccontextmanager
-async def get_transaction_db():
-    session: AsyncSession = SessionLocal()
-    try:
-        await session.begin()
-        yield session
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.commit()
-        await session.close()

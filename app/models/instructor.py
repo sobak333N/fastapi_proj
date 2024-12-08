@@ -26,8 +26,8 @@ class Instructor(Base):
     academical_experience = Column(Integer)
     H_index = Column(Float)
     
-    profile = relationship('User', back_populates='instructor_profile') 
-    course = relationship('Course', back_populates='instructor_course') 
+    user = relationship('User', back_populates='instructor') 
+    course = relationship('Course', back_populates='instructor') 
 
     __table_args__ = (
         Index('idx_instructor_user_id', 'user_id'),

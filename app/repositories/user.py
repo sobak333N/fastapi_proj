@@ -2,7 +2,7 @@ from fastapi import Depends, Request, status
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import get_db, get_transaction_db
+from app.core.db import get_db
 from app.models import User
 
 from app.auth.schemas import UserCreateModel

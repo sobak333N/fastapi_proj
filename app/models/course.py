@@ -41,8 +41,10 @@ class Course(Base):
     cost = Column(Integer)
     difficulty = Column(Enum(Difficulty))
 
-    category = relationship('Category', back_populates='category_course') 
-    instructor = relationship('Instructor', back_populates='instructor_course') 
+    category = relationship('Category', back_populates='course') 
+    instructor = relationship('Instructor', back_populates='course') 
+    lesson = relationship('Lesson', back_populates='course', lazy='noload') 
+
 
     __table_args__ = (
         Index('idx_course_course_id', 'course_id'),
@@ -63,10 +65,12 @@ class StudentCourse(Base):
     start_date = Column(DateTime) 
     end_date = Column(DateTime)
 
-    course = relationship('Course', back_populates='course_student_course')
-    student = relationship('Student', back_populates='student_student_course') 
+    student = relationship('Student', back_populates='course') 
+    student_lesson = relationship('StudentLesson', back_populates='student_course') 
+
 
     __table_args__ = (
+        Index('idx_student_course_student_course_id', 'student_course_id'),
         Index('idx_student_course_course_id', 'course_id'),
         Index('idx_student_course_student_id', 'student_id'),
     )

@@ -24,7 +24,7 @@ class LessonTask(Base):
     answers = Column(String, nullable=True)  # Could be JSON or a serialized list of answers
     answer = Column(String, nullable=False)
 
-    lesson = relationship("Lesson", back_populates="lesson_tasks")
+    lesson = relationship("Lesson", back_populates="lesson_task")
 
     __table_args__ = (
         Index('idx_lesson_tasks_lesson_task_id', 'lesson_task_id'),
@@ -36,13 +36,15 @@ class StudentLessonTask(Base):
     
     student_lesson_task_id = Column(Integer, primary_key=True)
     lesson_task_id = Column(Integer, ForeignKey('lesson_tasks.lesson_task_id'), nullable=False)
-    student_id = Column(Integer, ForeignKey('students.student_id'), nullable=False)
+    student_lesson_id = Column(Integer, ForeignKey('student_lesson.student_lesson_id'), nullable=False)
     answer = Column(String, nullable=False)
     correct = Column(Boolean, default=False)
 
-    lesson_task = relationship("LessonTask", back_populates="student_answers")
-    student = relationship("Student", back_populates="lesson_task_answers")
+    student_lesson = relationship("StudentLesson", back_populates="student_lesson_task")
+
 
     __table_args__ = (
         Index('idx_student_lesson_task_lesson_task_id', 'lesson_task_id'),
+        Index('idx_student_lesson_task_student_lesson_id', 'student_lesson_id'),
+        Index('idx_student_lesson_task_student_lesson_task_id', 'student_lesson_task_id'),
     )

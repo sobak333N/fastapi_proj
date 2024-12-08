@@ -27,7 +27,8 @@ class Student(Base):
     subscription_plan = Column(Enum(SubscriptionPlan))
     learning_style = Column(Enum(LearningStyle))
 
-    profile = relationship('User', back_populates='student_profile') 
+    user = relationship('User', back_populates='student') 
+    course = relationship('StudentCourse', back_populates='student', lazy='noload') 
 
     __table_args__ = (
         Index('idx_student_user_id', 'user_id'),

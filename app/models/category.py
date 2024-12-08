@@ -15,7 +15,7 @@ class Category(Base):
     category_id = Column(Integer, primary_key=True)
     category_name = Column(String)
 
-    courses = relationship('Course', back_populates='category')
+    course = relationship('Course', back_populates='category')
     
     __table_args__ = (
         Index('idx_category_category_id', 'category_id'),
