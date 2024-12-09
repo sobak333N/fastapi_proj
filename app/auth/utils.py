@@ -1,14 +1,15 @@
+import re
 import logging
 import uuid
 import string
 import random
 import jwt
-from passlib.context import CryptContext
+from typing import Tuple
 from datetime import datetime, timedelta
-import re
+from fastapi.encoders import jsonable_encoder
+from passlib.context import CryptContext
 
 from app.config import Config
-from app.auth.redis_auth import RedisAuth 
 
 passwd_context = CryptContext(schemes=["bcrypt"])
 
@@ -40,12 +41,11 @@ def verify_password(password: str, hash: str) -> bool:
     return passwd_context.verify(password, hash)
 
 
-def create_token(
-    user_data: dict, refresh: bool = False
-):
+def create_token(user_data: dict, refresh: bool = False) -> Tuple[str, datetime]:
     payload = {}
 
-    payload["user"] = user_data
+    user_data_dict = jsonable_encoder(user_data)
+    payload["user"] = user_data_dict
     payload["exp"] = datetime.now() + ( 
         timedelta(days=Config.JWT_REFRESH_EXP_DAYS)
         if refresh 
@@ -55,15 +55,15 @@ def create_token(
     payload["refresh"] = refresh
 
     token = jwt.encode(
-        payload=payload, key=Config.JWT_SECRET, algorithm=Config.JWT_ALGORITHM
+        payload=payload, key=Config.JWT_SECRET_KEY, algorithm=Config.JWT_ALGORITHM
     )
-    return token
+    return (token, payload["exp"])
 
 
 def decode_token(token: str) -> dict:
     try:
         token_data = jwt.decode(
-            jwt=token, key=Config.JWT_SECRET, algorithms=[Config.JWT_ALGORITHM]
+            jwt=token, key=Config.JWT_SECRET_KEY, algorithms=[Config.JWT_ALGORITHM]
         )
 
         return token_data

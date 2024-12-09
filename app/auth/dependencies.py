@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Tuple
 from datetime import datetime, timedelta
 
 from fastapi import Depends, Request, status
@@ -25,18 +25,21 @@ from app.errors import (
 user_service = UserService()
 user_repository = UserRepository()
 
+
 class AccessTokenDepends(HTTPBearer):
     def __init__(self, auto_error=True):
-        return super().__init__(self, auto_error=auto_error)
+        return super().__init__(auto_error=auto_error)
     
     async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:
-        creds = super().__call__(request)
+        creds = await super().__call__(request)
         token = creds.credentials
         token_data = decode_token(token)
         if token_data is None:
             raise InvalidToken()
-        # if token_data[]
         #  redis check jti
+        token_in_blocklist = await user_service.token_in_blocklist(token_data["jti"])
+        if token_in_blocklist:
+            raise AccessTokenRequired()
         if token_data["refresh"] is True:
             raise AccessTokenRequired()
         if datetime.fromtimestamp(token_data["exp"]) < datetime.now():
@@ -48,21 +51,28 @@ class RefreshTokenDepends:
     def __init__(self):
         pass
 
-    async def __call__(self, request: Request) -> dict | None:
+    async def __call__(self, 
+        request: Request,
+        session: AsyncSession = Depends(get_db),
+    ) -> dict | None:
         token = request.cookies.get("refresh_token")
         if not token:
             raise RefreshTokenRequired()
         token_data = decode_token(token)
         if not token_data:
             raise RefreshTokenRequired()
-        
+
+#       validate token in db
+        refresh_token_in_whitelist = await user_repository.refresh_token_exists(token, session)
+        if not refresh_token_in_whitelist:
+            raise RefreshTokenRequired()
+
         if token_data["refresh"] is False:
             raise RefreshTokenRequired()
         if datetime.fromtimestamp(token_data["exp"]) < datetime.now():
             raise RefreshTokenRequired()
         
-#       validate token in db 
-        
+        token_data["token"] = token
         return token_data
 
 

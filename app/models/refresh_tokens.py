@@ -3,7 +3,8 @@ from sqlalchemy import (
     Column, Integer, 
     Enum, ForeignKey,
     String, Float, 
-    Index, BigInteger
+    Index, BigInteger,
+    DateTime,
 )
 from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
@@ -16,9 +17,9 @@ class RefreshToken(Base):
     refresh_token_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.user_id'))
 
-    refresh_token = Column(String)
-    finger_print = Column(String)
-    expiresIn = Column(BigInteger)
+    refresh_token = Column(String, nullable=False)
+    finger_print = Column(String, nullable=False )
+    expiresIn = Column(BigInteger, nullable=False)
 
     user = relationship('User', back_populates='refresh_token') 
 
