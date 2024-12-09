@@ -151,4 +151,15 @@ def register_all_errors(app: FastAPI):
             },
         ),
     )
+    app.add_exception_handler(
+        InvalidCredentials,
+        create_exception_handler(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            initial_detail={
+                "message": "Invalid credentials",
+                "resolution": "Please input valid credentials",
+                "error_code": "invalid_credentials",
+            },
+        ),
+    )
     

@@ -91,8 +91,8 @@ async def login_users(login_data: UserLoginModel, session: AsyncSession = Depend
 async def logout(
     response: Response,
     session: AsyncSession=Depends(get_db), 
+    access_token_data: dict=Depends(AccessTokenDepends()),  
     refresh_token_data: dict=Depends(RefreshTokenDepends()),
-    access_token_data: dict=Depends(AccessTokenDepends()),
 ):    
     await user_service.marking_tokens_as_expired(refresh_token_data, access_token_data, session)
     response.delete_cookie("refresh_token")
@@ -115,9 +115,10 @@ async def refresh(
         refresh=False
     )
     response = JSONResponse(
-        content={"refreshed"}
+        content={"message": "refreshed"}
     )
     response.headers["Authorization"] = f"Bearer {access_token}"
+    return response
     
 
 @auth_router.post("/current_user", response_model=UserResponse)
