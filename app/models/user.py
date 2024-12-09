@@ -10,6 +10,7 @@ from sqlalchemy.sql import func
 from enum import Enum as PyEnum
 from app.core.db import Base
 
+
 class Roles2(PyEnum):
     student = "student"
     instructor = "instructor"

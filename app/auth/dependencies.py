@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Type
 from datetime import datetime, timedelta
 
 from fastapi import Depends, Request, status
@@ -8,10 +8,11 @@ from fastapi.security.http import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
-from app.models.user import User
+from app.models.user import User, Roles2
 # from src.db.redis import token_in_blocklist
 
 from app.services.user import UserService
+from app.auth.schemas import UserCreateModel, StudentCreateModel, InstructorCreateModel
 from app.repositories.user import UserRepository
 from app.auth.utils import decode_token
 from app.errors import (
@@ -96,3 +97,4 @@ async def get_current_user(
 #             return True
 
 #         raise InsufficientPermission()
+

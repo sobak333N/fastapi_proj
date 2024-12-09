@@ -24,8 +24,8 @@ class Student(Base):
     student_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.user_id'))
 
-    subscription_plan = Column(Enum(SubscriptionPlan))
-    learning_style = Column(Enum(LearningStyle))
+    subscription_plan = Column(Enum(SubscriptionPlan), nullable=False)
+    learning_style = Column(Enum(LearningStyle), nullable=True)
 
     user = relationship('User', back_populates='student') 
     course = relationship('StudentCourse', back_populates='student', lazy='noload') 

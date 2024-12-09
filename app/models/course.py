@@ -4,6 +4,7 @@ from sqlalchemy import (
     String, DateTime, 
     Enum, ForeignKey, 
     Float, Index,
+    Boolean
 )
 from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
@@ -62,6 +63,7 @@ class StudentCourse(Base):
     payment_type = Column(Enum(PaymentType))
     payment_status = Column(Enum(PaymentStatus))
     progress = Column(Float)
+    finished = Column(Boolean)
     start_date = Column(DateTime) 
     end_date = Column(DateTime)
 

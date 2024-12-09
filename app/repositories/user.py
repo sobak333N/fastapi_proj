@@ -1,21 +1,36 @@
+from typing import Type, TypeVar, List
+
 from fastapi import Depends, Request, status
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload, noload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete
 
 from app.core.db import get_db
 from app.models import User, RefreshToken
-
+from app.models.user import Roles2
 from app.auth.schemas import UserCreateModel
 from app.auth.utils import generate_passwd_hash
 
+
+T = TypeVar('T')
 
 class UserRepository:
     async def get_user_by_email(self, email: str, session: AsyncSession):
         statement = select(User).where(User.email == email)
         result = await session.execute(statement)
         user = result.scalars().first()
+        if user:
+            if user.role == Roles2.student:
+                statement = statement.options(selectinload(User.student))
+            elif user.role == Roles2.instructor:
+                statement = statement.options(selectinload(User.instructor))
+            statement = statement.options(noload(User.refresh_token))
+
+            result = await session.execute(statement)
+            user = result.scalars().first()
         return user
+
 
     async def user_exists(self, email, session: AsyncSession):
         user = await self.get_user_by_email(email, session)
@@ -61,3 +76,20 @@ class UserRepository:
         statement = select(RefreshToken).where(RefreshToken.refresh_token == refresh_token)
         result = await session.execute(statement)
         return result is not None
+    
+
+class BaseRepository:
+    def __init__(self, model: Type[T]):
+        self.model = model
+
+    async def get_by_user_id(self, user_id: int, session: AsyncSession) -> T:
+        statement = select(self.model).where(self.model.user_id == user_id)
+        result = await session.execute(statement)
+        instance = result.scalars().first()
+        return instance
+
+    async def add(self, data: dict, session: AsyncSession) -> T:
+        instance = self.model(**data)
+        session.add(instance)
+        await session.commit()
+        return instance

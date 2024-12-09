@@ -1,3 +1,4 @@
+from typing import Union
 from datetime import timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,15 +7,39 @@ from fastapi.responses import JSONResponse
 
 from app.core.db import get_db
 from app.config import Config
-from app.models import User
-from app.schemas import UserResponse
+from app.models.user import User, Roles2
+from app.schemas import UserResponse, InstructorResponse, StudentResponse
 from app.repositories import UserRepository
+from app.services import UserService
 from app.auth.utils import create_token
+from app.auth.schemas import (
+    StudentCreateModel,
+    InstructorCreateModel,
+)
+
 
 
 class AuthService:
+    async def signup(self, user_data: Union[StudentCreateModel,InstructorCreateModel], session: AsyncSession):
+        user_service = UserService()
+        await user_service.set_temporary_token(user_data, session)
+        return {"message": "Go to link in email to verify account"}
+
+
+    def generate_differents_profile(self, user: User):
+        if user.role == Roles2.student:
+            for attr, value in user.student.__dict__.items():
+                if not attr.startswith('_'):
+                    setattr(user, attr, value)
+            return StudentResponse(**user.__dict__)
+        elif user.role == Roles2.instructor: 
+            for attr, value in user.instructor.__dict__.items():
+                if not attr.startswith('_'):
+                    setattr(user, attr, value)
+            return InstructorResponse(**user.__dict__)
+
+
     async def create_auth_response(self, user: User, session: AsyncSession):
-        user_dict = jsonable_encoder(user)
         access_token, _ = create_token(
             user_data={
                 "user_id": user.user_id,
@@ -39,10 +64,11 @@ class AuthService:
             expiresIn=int(refresh_exp.timestamp()),
             session=session
         )
+        response_user_data = self.generate_differents_profile(user)
         response = JSONResponse(
             content={
                 "message": "Login successful",
-                "user": jsonable_encoder(UserResponse(**user_dict))
+                "user": jsonable_encoder(response_user_data)
             }
         )
         response.headers["Authorization"] = f"Bearer {access_token}"

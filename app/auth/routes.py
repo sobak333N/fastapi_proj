@@ -1,16 +1,17 @@
 from datetime import datetime, timedelta
 import json
-from typing import Tuple
+from typing import Tuple, Type, Union
 
 from fastapi import APIRouter, Response, Depends, status, BackgroundTasks
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 from app.core.db import get_db
-from app.models import User
+from app.models.user import User
 from app.services.user import UserService
 from app.repositories.user import UserRepository
 from app.errors import(
@@ -25,11 +26,13 @@ from app.auth.dependencies import (
 )
 from app.auth.schemas import (
     UserCreateModel,
+    StudentCreateModel,
+    InstructorCreateModel,
     UserLoginModel,
     PasswordResetRequestModel,
     PasswordResetConfirmModel,
 )
-from app.schemas.user import UserResponse
+from app.schemas import UserResponse, InstructorResponse, StudentResponse
 from app.auth.utils import (
     generate_random_token,
     verify_password,
@@ -41,34 +44,36 @@ from app.auth.utils import (
 auth_router = APIRouter()
 user_service = UserService()
 user_repository = UserRepository()
+auth_service = AuthService()
 
 # role_checker = RoleChecker(["admin", "user"])
 
 
 
+@auth_router.post("/signup/student", status_code=status.HTTP_201_CREATED)
+async def create_student(
+    user_data: StudentCreateModel,
+    session: AsyncSession=Depends(get_db)
+):
+    return await auth_service.signup(user_data, session)
 
 
-@auth_router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def create_user_Account(user_data: UserCreateModel, session: AsyncSession=Depends(get_db)):
-    # """
-    # Create user account using email, username, first_name, last_name, role
-    # params:
-    #     user_data: UserCreateModel
-    # """
-
-    await user_service.set_temporary_token(user_data, session)
-
-    return {
-        "message": "Go to link in email to verify account",
-    }
+@auth_router.post("/signup/instructor", status_code=status.HTTP_201_CREATED)
+async def create_instructor(
+    user_data: InstructorCreateModel,
+    session: AsyncSession=Depends(get_db)
+):
+    try:
+        return await auth_service.signup(user_data, session)
+    except ValidationError as e:
+        raise HTTPException(status_code=200, detail=e.errors())
 
 
 @auth_router.get("/verify/{token}", response_model=UserResponse)
 async def verify_user_account(token: str, session: AsyncSession=Depends(get_db)):
     new_user = await user_service.accept_register(token, session)
-    new_user_dict = jsonable_encoder(new_user)
-    user_data = UserResponse(**new_user_dict)
-    return user_data
+    response = await auth_service.create_auth_response(new_user, session)
+    return response
 
 
 @auth_router.post("/login")
@@ -81,7 +86,6 @@ async def login_users(login_data: UserLoginModel, session: AsyncSession = Depend
         # user_data = UserResponse(**user)
         password_valid = verify_password(password, user.password_hash)
         if password_valid:
-            auth_service = AuthService()
             response = await auth_service.create_auth_response(user, session)
             return response
     raise InvalidCredentials()
@@ -121,8 +125,6 @@ async def refresh(
     return response
     
 
-@auth_router.post("/current_user", response_model=UserResponse)
-async def current_user(
-    user: User=Depends(get_current_user)
-):
-    return user
+@auth_router.post("/current_user")
+async def current_user(user: User=Depends(get_current_user)):
+    return auth_service.generate_differents_profile(user)

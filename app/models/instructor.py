@@ -21,10 +21,10 @@ class Instructor(Base):
     instructor_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.user_id'))
 
-    education = Column(String)
-    academic_degree = Column(Enum(AcademicDegree))
-    academical_experience = Column(Integer)
-    H_index = Column(Float)
+    education = Column(String, nullable=False)
+    academic_degree = Column(Enum(AcademicDegree), nullable=False)
+    academical_experience = Column(Integer, nullable=False)
+    H_index = Column(Float, nullable=True)
     
     user = relationship('User', back_populates='instructor') 
     course = relationship('Course', back_populates='instructor') 
