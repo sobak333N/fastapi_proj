@@ -11,23 +11,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 from app.core.db import get_db
-from app.models.user import User
+from app.models.user import User, Roles2
 from app.services.user import UserService
 from app.repositories.user import UserRepository
 from app.errors import(
-     UserAlreadyExists, UserNotFound, 
+    #  UserAlreadyExists, UserNotFound, 
      InvalidCredentials, InvalidToken,
 )
 from app.config import Config
 from app.auth.service import AuthService
 from app.auth.dependencies import (
     get_current_user, RefreshTokenDepends,
-    AccessTokenDepends,
+    AccessTokenDepends, RoleChecker,
 )
 from app.auth.schemas import (
     UserCreateModel,
     StudentCreateModel,
     InstructorCreateModel,
+    AdminCreateModel,
     UserLoginModel,
     PasswordResetRequestModel,
     PasswordResetConfirmModel,
@@ -43,7 +44,6 @@ from app.auth.utils import (
 
 auth_router = APIRouter()
 user_service = UserService()
-user_repository = UserRepository()
 auth_service = AuthService()
 
 # role_checker = RoleChecker(["admin", "user"])
@@ -81,7 +81,7 @@ async def login_users(login_data: UserLoginModel, session: AsyncSession = Depend
     email = login_data.email
     password = login_data.password
 
-    user = await user_repository.get_user_by_email(email, session)
+    user = await user_service.get_user_by_email(email, session)
     if user is not None:
         # user_data = UserResponse(**user)
         password_valid = verify_password(password, user.password_hash)
@@ -109,7 +109,7 @@ async def refresh(
     refresh_token_data: dict=Depends(RefreshTokenDepends()),
 ):
     email = refresh_token_data["user"]["email"]
-    user = await user_repository.get_user_by_email(email, session)
+    user = await user_service.get_user_by_email(email, session)
     access_token, _ = create_token(
         user_data={
             "user_id": user.user_id,
@@ -125,6 +125,29 @@ async def refresh(
     return response
     
 
-@auth_router.post("/current_user")
+@auth_router.post("/current-user")
 async def current_user(user: User=Depends(get_current_user)):
     return auth_service.generate_differents_profile(user)
+
+
+@auth_router.post("/change-password")
+async def current_user(
+    passwords: PasswordResetConfirmModel,
+    user: User=Depends(get_current_user),   
+    session: AsyncSession=Depends(get_db), 
+):
+    await user_service.change_password(passwords.new_password, user, session)
+    return JSONResponse(content={"message": "changed"})
+
+
+
+# ADMIN ROUTES
+
+@auth_router.post("/create-new-admin")
+async def current_user(
+    admin_data: AdminCreateModel,
+    session: AsyncSession=Depends(get_db), 
+    permission: bool=Depends(RoleChecker([Roles2.admin]))
+):
+    await auth_service.mail_for_admin(admin_data,session)
+    return await auth_service.signup(admin_data, session)

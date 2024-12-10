@@ -20,7 +20,6 @@ from app.errors import (
     RefreshTokenRequired,
     AccessTokenRequired,
     InsufficientPermission,
-    AccountNotVerified,
 )
 
 user_service = UserService()
@@ -37,6 +36,8 @@ class AccessTokenDepends(HTTPBearer):
         token_data = decode_token(token)
         if token_data is None:
             raise AccessTokenRequired()
+        print("WTF")
+
         #  redis check jti
         token_in_blocklist = await user_service.token_in_blocklist(token_data["jti"])
         if token_in_blocklist:
@@ -86,15 +87,13 @@ async def get_current_user(
     return user
 
 
-# class RoleChecker:
-#     def __init__(self, allowed_roles: List[str]) -> None:
-#         self.allowed_roles = allowed_roles
+class RoleChecker:
+    def __init__(self, allowed_roles: List[str]) -> None:
+        self.allowed_roles = set(allowed_roles)
 
-#     def __call__(self, current_user: User = Depends(get_current_user)) -> Any:
-#         if not current_user.is_verified:
-#             raise AccountNotVerified()
-#         if current_user.role in self.allowed_roles:
-#             return True
+    def __call__(self, current_user: User = Depends(get_current_user)) -> bool:
+        if current_user.role in self.allowed_roles:
+            return True
 
-#         raise InsufficientPermission()
+        raise InsufficientPermission()
 

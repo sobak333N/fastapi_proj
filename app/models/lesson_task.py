@@ -30,6 +30,8 @@ class LessonTask(Base):
         Index('idx_lesson_tasks_lesson_task_id', 'lesson_task_id'),
         Index('idx_lesson_tasks_lesson_id', 'lesson_id'),
     )
+    primary_key = 'lesson_task_id'
+
 
 class StudentLessonTask(Base):
     __tablename__ = 'student_lesson_task'
@@ -48,3 +50,5 @@ class StudentLessonTask(Base):
         Index('idx_student_lesson_task_student_lesson_id', 'student_lesson_id'),
         Index('idx_student_lesson_task_student_lesson_task_id', 'student_lesson_task_id'),
     )
+    primary_key = 'student_lesson_task_id'
+    

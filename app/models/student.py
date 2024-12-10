@@ -34,3 +34,5 @@ class Student(Base):
         Index('idx_student_user_id', 'user_id'),
         Index('idx_student_student_id', 'student_id'),
     )
+    primary_key = 'student_id'
+    

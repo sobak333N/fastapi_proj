@@ -52,6 +52,7 @@ class Course(Base):
         Index('idx_course_instructor_id', 'instructor_id'),
         Index('idx_course_category_id', 'category_id'),
     )
+    primary_key = 'course_id'
 
 
 class StudentCourse(Base):
@@ -76,3 +77,4 @@ class StudentCourse(Base):
         Index('idx_student_course_course_id', 'course_id'),
         Index('idx_student_course_student_id', 'student_id'),
     )
+    primary_key = 'student_course_id'

@@ -4,6 +4,7 @@ from typing import Optional
 from enum import Enum
 from pydantic.networks import EmailStr
 
+
 class RolesEnum(str, Enum):
     student = 'student'
     instructor = 'instructor'

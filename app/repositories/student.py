@@ -9,11 +9,11 @@
 # from app.models import User, RefreshToken
 # from app.auth.schemas import UserCreateModel
 # from app.auth.utils import generate_passwd_hash
-from app.repositories.user import BaseRepository
+from app.repositories.user import BaseUserRepository
 from app.models import Student
 
 
-class StudentRepository(BaseRepository):
+class StudentRepository(BaseUserRepository):
     def __init__(self):
         return super().__init__(Student)
 

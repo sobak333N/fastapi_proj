@@ -23,6 +23,8 @@ class Lesson(Base):
         Index('idx_lessons_lesson_id', 'lesson_id'),
         Index('idx_lessons_course_id', 'course_id'),
     )
+    primary_key = 'lesson_id'
+
 
 
 class StudentLesson(Base):
@@ -42,3 +44,4 @@ class StudentLesson(Base):
         Index('idx_student_lesson_lesson_id', 'lesson_id'),
         Index('idx_student_lesson_student_course_id', 'student_course_id'),
     )
+    primary_key = 'student_lesson_id'

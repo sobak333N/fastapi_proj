@@ -20,7 +20,7 @@ class Roles2(PyEnum):
 class User(Base):
     __tablename__ = 'users'
     user_id = Column(Integer, primary_key=True)
-    email = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     second_name = Column(String, nullable=True)
@@ -36,3 +36,4 @@ class User(Base):
     __table_args__ = (
         Index('idx_user_id', 'user_id'),
     )
+    primary_key = 'user_id'

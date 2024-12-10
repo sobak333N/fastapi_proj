@@ -15,11 +15,16 @@ from app.auth.utils import create_token
 from app.auth.schemas import (
     StudentCreateModel,
     InstructorCreateModel,
+    AdminCreateModel,
 )
 
 
-
 class AuthService:
+    async def mail_for_admin(self, admin_data: AdminCreateModel, session: AsyncSession):
+        """
+        Logic to send mail to admin mail with invation link for creating account
+        """
+
     async def signup(self, user_data: Union[StudentCreateModel,InstructorCreateModel], session: AsyncSession):
         user_service = UserService()
         await user_service.set_temporary_token(user_data, session)
@@ -37,6 +42,8 @@ class AuthService:
                 if not attr.startswith('_'):
                     setattr(user, attr, value)
             return InstructorResponse(**user.__dict__)
+        elif user.role == Roles2.admin: 
+            return UserResponse(**user.__dict__)
 
 
     async def create_auth_response(self, user: User, session: AsyncSession):

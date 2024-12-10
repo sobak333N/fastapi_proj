@@ -41,10 +41,19 @@ student_config = {
         }
     }
 }
-
-
-
-
+admin_config = {
+    "json_schema_extra": {
+        "example": {
+            "first_name": "John",
+            "last_name": "Doe",
+            "second_name": "Gondoe",
+            "birthdate": "2004-08-06",
+            "email": "admin@co.com",
+            "password": "Q1w2e3r4-",
+            "role": "admin",
+        }
+    }
+}
 
 class UserCreateModel(BaseModel):
     first_name: str = Field(max_length=25)
@@ -98,6 +107,23 @@ class InstructorCreateModel(UserCreateModel):
         return values
         
 
+class AdminCreateModel(UserCreateModel):
+    @root_validator(pre=True)
+    def validate(cls, values):
+        email = values.get("email")
+        password = values.get("password")
+        validate_email(email)
+        validate_password(password)
+        return values
+    
+    @root_validator(pre=True)
+    def validate_admin(cls, values):
+        role = values.get("role")
+        if role != "admin":
+            raise ValueError("not admin fields")
+        return values
+        
+
 
 class UserLoginModel(BaseModel):
     email: str = Field(max_length=40)
@@ -124,6 +150,5 @@ class PasswordResetConfirmModel(BaseModel):
         confirm_new_password = values.get('confirm_new_password')
         if new_password != confirm_new_password:
             raise ValueError("Passwords are not equal")
-        email = values.get("email")
-        validate_email(email)
+        validate_password(new_password)
         return values

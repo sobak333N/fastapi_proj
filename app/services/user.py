@@ -14,23 +14,40 @@ from app.repositories import (
     InstructorRepository, 
     StudentRepository,
 )
+from app.services.base_service import BaseService
 from app.auth.schemas import UserCreateModel
 from app.auth.utils import generate_passwd_hash, generate_random_token
 from app.auth.redis_auth import RedisAuth
 from app.errors import (
     UserAlreadyExists,
     EmailTokenError,
+    InstanceDoesntExists,
 )
 
 
 
-class UserService:
+class UserService(BaseService):
 
     def __init__(self):
+        super().__init__(UserRepository, "User")
         self.redis_auth = RedisAuth()
-        self.user_repository = UserRepository()
         self.instructor_repository = InstructorRepository()
         self.student_repository = StudentRepository()
+
+    async def get_user_by_email(self, email: str, session: AsyncSession):
+        user = await self.repository.get_user_by_email(email, session)
+        # if user is None:
+            # InstanceDoesntExists(model_name=self.model_name, detail=self.model_name)
+        return user
+        
+    async def change_password(
+        self,
+        password: str,
+        user: User,
+        session: AsyncSession,
+    ):
+        password_hash = generate_passwd_hash(password)
+        await self.repository.set_value(user, "password_hash", password_hash, session)
 
 
     async def set_temporary_token(
@@ -39,7 +56,7 @@ class UserService:
         session: AsyncSession
     ) -> None:
         redis_client = await self.redis_auth.get_redis_client()
-        user_exists = await self.user_repository.user_exists(user_data.email, session)
+        user_exists = await self.repository.user_exists(user_data.email, session)
 
         if user_exists:
             raise UserAlreadyExists()
@@ -66,8 +83,6 @@ class UserService:
             raise EmailTokenError()
 
         full_user_data = json.loads(user_data_json)
-        print(full_user_data.get("birthdate"))
-        print(type(full_user_data.get("birthdate")))
         user_data = {
             "first_name": full_user_data.get("first_name"),
             "last_name": full_user_data.get("last_name"),
@@ -81,14 +96,14 @@ class UserService:
             "password_hash": full_user_data.get("password_hash"),
             "role": Roles2[full_user_data.get("role")],
         }
-        new_user = await self.user_repository.create_user(user_data, session)
+        new_user = await self.repository.create_instance(user_data, session)
         if user_data["role"] == Roles2.student:
             student_data = {
                 "user_id": new_user.user_id,
                 "subscription_plan": full_user_data.get("subscription_plan"),
                 "learning_style": full_user_data.get("learning_style"),
             }
-            student = await self.student_repository.add(student_data, session)
+            student = await self.student_repository.create_instance(student_data, session)
             new_user.student = student
         elif user_data["role"] == Roles2.instructor:
             instructor_data = {
@@ -98,7 +113,7 @@ class UserService:
                 "academical_experience": full_user_data.get("academical_experience"),
                 "H_index": full_user_data.get("H_index"),
             }
-            instructor = await self.instructor_repository.add(instructor_data, session)
+            instructor = await self.instructor_repository.create_instance(instructor_data, session)
             new_user.instructor = instructor
         return new_user
     
@@ -108,7 +123,7 @@ class UserService:
             access_token_data: str,
             session: AsyncSession,        
     ) -> None:
-        await self.user_repository.remove_refresh_token(refresh_token_data["token"], session)
+        await self.repository.remove_refresh_token(refresh_token_data["token"], session)
         refresh_token_data.pop("token")
         redis_client = await self.redis_auth.get_redis_client()
         await redis_client.set(name=access_token_data["jti"], value="exp", ex=Config.JWT_ACCESS_EXP_MINUTES*60)

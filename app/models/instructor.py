@@ -33,3 +33,4 @@ class Instructor(Base):
         Index('idx_instructor_user_id', 'user_id'),
         Index('idx_instructor_instructor_id', 'instructor_id'),
     )
+    primary_key = 'instructor_id'
