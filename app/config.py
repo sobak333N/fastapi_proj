@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     
     EMAIL_TOKENS_EX_MINUTES: int
 
+    PAGE_LIMIT: int
+
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str

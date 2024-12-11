@@ -1,8 +1,11 @@
-from typing import Type, TypeVar, Any, Optional
+from typing import Type, TypeVar, Any, Optional, List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.future import select
-from sqlalchemy import update
+from sqlalchemy import update, func
+
+from app.config import Config
 
 
 T = TypeVar('T')
@@ -24,7 +27,12 @@ class BaseRepository:
         instance = result.scalar_one_or_none()
         return instance
 
-    async def get_instance_by_unique_field(self, unique_attr: str, value: Any, session: AsyncSession) -> Optional[T]:
+    async def get_instance_by_unique_field(
+            self, 
+            unique_attr: str, 
+            value: Any, 
+            session: AsyncSession
+        ) -> Optional[T]:
         if hasattr(self.model, unique_attr):
             statement = (
                 select(self.mode)
@@ -34,6 +42,21 @@ class BaseRepository:
             instance = result.scalar_one_or_none()
             return instance
         return None
+
+    async def get_all_instance(self, page: int , session: AsyncSession) -> List[T]:
+        statement = (
+            select(self.model)
+            .order_by(self.model_pk)
+            .offset(Config.PAGE_LIMIT*(page-1))
+            .limit(Config.PAGE_LIMIT)
+        )
+        result = await session.execute(statement)
+        return result.scalars().all()
+
+    async def get_total_count(self, session: AsyncSession) -> List[T]:
+        statement = select(func.count()).select_from(self.model)
+        result = await session.execute(statement)
+        return result.scalar()
 
     async def create_instance(self, session: AsyncSession, **kwargs) -> Optional[T]:
         new_instance = self.model(**kwargs)
@@ -63,3 +86,7 @@ class BaseRepository:
         session.add(instance)
         await session.commit()
         return instance
+
+    async def delete_instance(self, instance: T , session: AsyncSession) -> None:
+        await session.delete(instance)
+        await session.commit()

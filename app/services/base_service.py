@@ -1,10 +1,12 @@
 from typing import Type, Any
+from pydantic import BaseModel
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
 from app.repositories.base_repository import BaseRepository
 from app.errors import InstanceDoesntExists
-
+from app.base_responses import BaseSuccessResponse
 
 
 class BaseService:
@@ -14,14 +16,36 @@ class BaseService:
 
     async def get_instance_by_pk(self, pk: int, session: AsyncSession):
         instance = await self.repository.get_instance_by_pk(pk, session)
-        print(instance)
         if instance is None:
-            print(self.model_name)
-            InstanceDoesntExists(detail=self.model_name)
+            raise InstanceDoesntExists(message=self.model_name)
         return instance
 
-    async def create_instance(self, session: AsyncSession, **kwargs):
-        return await self.repository.create_instance(session, **kwargs)
+    async def get_instance_by_pk(self, pk: int, session: AsyncSession):
+        instance = await self.repository.get_instance_by_pk(pk, session)
+        if instance is None:
+            raise InstanceDoesntExists(message=self.model_name)
+        return instance
+
+    async def get_all_instance(self, page: int, session: AsyncSession):
+        return await self.repository.get_all_instance(page, session)
+
+    async def get_total_count(self, session):
+        return await self.repository.get_total_count(session)
+
+    async def create_instance(self, instance_pydatinc_model: BaseModel, session: AsyncSession):
+        instance_data = jsonable_encoder(instance_pydatinc_model)
+        return await self.repository.create_instance(session, **instance_data)
     
-    async def update_instance(self, instance: Any, session: AsyncSession, **kwargs):
-        return await self.repository.update_instance(instance, session, **kwargs)
+    async def update_instance(self, instance: Any, instance_pydatinc_model: BaseModel, session: AsyncSession):
+        instance_data = jsonable_encoder(instance_pydatinc_model)
+        return await self.repository.update_instance(instance, session, **instance_data)
+    
+    async def delete_instance(self, pk: int, session: AsyncSession) -> None:
+        instance = await self.get_instance_by_pk(pk, session)
+        await self.repository.delete_instance(instance, session)
+        return BaseSuccessResponse(message=f"{self.model_name} was deleted")
+
+    async def patch_instance(self, pk: int , instance_pydantic_model: BaseModel, session: AsyncSession):
+        instance = await self.get_instance_by_pk(pk, session)
+        patched_instance = await self.update_instance(instance, instance_pydantic_model, session)
+        return patched_instance

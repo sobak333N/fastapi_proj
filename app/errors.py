@@ -5,13 +5,12 @@ from fastapi.exceptions import HTTPException
 from fastapi import FastAPI, status
 from sqlalchemy.exc import SQLAlchemyError
 
-class CourcesException(HTTPException):
+class CourcesException(Exception):
     """This is the base class for all Cources errors"""
-    
-    def __init__(self, status_code: int = None, detail: str = None, **kwargs):
+    def __init__(self, status_code: int = None, message: str = None):
         self.status_code = status_code
-        self.detail = detail
-        super().__init__(detail, **kwargs)
+        self.message = message
+        super().__init__(self.message)
 
 class InvalidToken(CourcesException):
     """User has provided an invalid or expired token"""
@@ -51,9 +50,8 @@ class InsufficientPermission(CourcesException):
 class InstanceDoesntExists(CourcesException):
     """Instance doesn't exist error."""
     
-    def __init__(self, detail: str = "Instance with this id doesn't exist", **kwargs):
-        # Use model_name for dynamic message replacement
-        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail, **kwargs)
+    def __init__(self, message: str = "Instance with this id doesn't exist"):
+        super().__init__(message=message)
 
 
 def create_exception_handler(
@@ -61,11 +59,9 @@ def create_exception_handler(
 ) -> Callable[[Request, Exception], JSONResponse]:
 
     async def exception_handler(request: Request, exc: CourcesException):
-        print(exc)
-        if hasattr(exc, "detail"):
-            # If the exception has a model name, modify the message accordingly
-            if hasattr(exc, 'model_name') and exc.model_name:
-                initial_detail["message"] = initial_detail["message"].replace("Instance", exc.model_name)
+        if hasattr(exc, "message") and exc.message is not None:
+            initial_detail["message"] = initial_detail["message"].replace("Instance", exc.message)
+            initial_detail["resolution"] = initial_detail["resolution"].replace("entity", (exc.message).lower())
         return JSONResponse(status_code=status_code, content=initial_detail)
 
     return exception_handler

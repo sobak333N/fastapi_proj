@@ -36,7 +36,6 @@ class AccessTokenDepends(HTTPBearer):
         token_data = decode_token(token)
         if token_data is None:
             raise AccessTokenRequired()
-        print("WTF")
 
         #  redis check jti
         token_in_blocklist = await user_service.token_in_blocklist(token_data["jti"])

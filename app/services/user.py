@@ -16,12 +16,17 @@ from app.repositories import (
 )
 from app.services.base_service import BaseService
 from app.auth.schemas import UserCreateModel
-from app.auth.utils import generate_passwd_hash, generate_random_token
+from app.auth.utils import (
+    generate_passwd_hash, 
+    generate_random_token,
+    verify_password,
+)
 from app.auth.redis_auth import RedisAuth
 from app.errors import (
     UserAlreadyExists,
     EmailTokenError,
     InstanceDoesntExists,
+    InvalidCredentials,
 )
 
 
@@ -42,10 +47,14 @@ class UserService(BaseService):
         
     async def change_password(
         self,
+        old_password: str,
         password: str,
         user: User,
         session: AsyncSession,
     ):
+        password_valid = verify_password(old_password, user.password_hash)
+        if not password_valid:
+            raise InvalidCredentials()
         password_hash = generate_passwd_hash(password)
         await self.repository.set_value(user, "password_hash", password_hash, session)
 

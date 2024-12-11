@@ -18,6 +18,7 @@ from app.errors import(
     #  UserAlreadyExists, UserNotFound, 
      InvalidCredentials, InvalidToken,
 )
+from app.base_responses import BaseSuccessResponse
 from app.config import Config
 from app.auth.service import AuthService
 from app.auth.dependencies import (
@@ -63,10 +64,7 @@ async def create_instructor(
     user_data: InstructorCreateModel,
     session: AsyncSession=Depends(get_db)
 ):
-    try:
-        return await auth_service.signup(user_data, session)
-    except ValidationError as e:
-        raise HTTPException(status_code=200, detail=e.errors())
+    return await auth_service.signup(user_data, session)
 
 
 @auth_router.get("/verify/{token}", response_model=UserResponse)
@@ -100,7 +98,7 @@ async def logout(
 ):    
     await user_service.marking_tokens_as_expired(refresh_token_data, access_token_data, session)
     response.delete_cookie("refresh_token")
-    return {"message": "Logged out successfully"}
+    return BaseSuccessResponse(message="Logged out successfully")
 
 
 @auth_router.post("/refresh")
@@ -118,9 +116,7 @@ async def refresh(
         },
         refresh=False
     )
-    response = JSONResponse(
-        content={"message": "refreshed"}
-    )
+    response = BaseSuccessResponse(message="Refreshed")
     response.headers["Authorization"] = f"Bearer {access_token}"
     return response
     
@@ -136,8 +132,9 @@ async def current_user(
     user: User=Depends(get_current_user),   
     session: AsyncSession=Depends(get_db), 
 ):
-    await user_service.change_password(passwords.new_password, user, session)
-    return JSONResponse(content={"message": "changed"})
+    await user_service.change_password(passwords.old_password, passwords.new_password, user, session)
+    return BaseSuccessResponse(message="Password was changed")
+
 
 
 
