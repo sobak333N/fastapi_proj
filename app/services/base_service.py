@@ -20,11 +20,13 @@ class BaseService:
             raise InstanceDoesntExists(message=self.model_name)
         return instance
 
-    async def get_instance_by_pk(self, pk: int, session: AsyncSession):
-        instance = await self.repository.get_instance_by_pk(pk, session)
-        if instance is None:
-            raise InstanceDoesntExists(message=self.model_name)
-        return instance
+    # async def get_instance_by_unique_field(self, pk: int, session: AsyncSession):
+    #     instance = await self.repository.get_instance_by_pk(pk, session)
+    #     if instance is None:
+    #         raise InstanceDoesntExists(message=self.model_name)
+    #     return instance
+    async def instance_exists(self, pk: int, session: AsyncSession) -> bool:
+        return bool(await self.get_instance_by_pk(pk, session))
 
     async def get_all_instance(self, page: int, session: AsyncSession):
         return await self.repository.get_all_instance(page, session)

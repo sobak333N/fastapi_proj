@@ -5,23 +5,23 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas import (
-    CategorySchema, ResponseCategorySchema, 
-    CategoryPagedResponseSchema,
+    InputCategorySchema, 
+    ShortResponseCategorySchema,
+    CategoryPagedResponseSchema, FullResponseCategorySchema
 )
 from app.core.db import get_db
 from app.auth.dependencies import RoleChecker
 from app.models.user import Roles2
-from app.models import Category
 from app.services import CategoryService
-from app.base_responses import BaseSuccessResponse, PagedResponse
+
 
 category_router = APIRouter()
 category_service = CategoryService()
 
 
-@category_router.post("/create", status_code=status.HTTP_201_CREATED)
+@category_router.post("/create", status_code=status.HTTP_201_CREATED, response_model=FullResponseCategorySchema)
 async def create_category(
-    category_data: CategorySchema,
+    category_data: InputCategorySchema,
     session: AsyncSession=Depends(get_db),
     permission: bool=Depends(RoleChecker([Roles2.admin])),
 ):
@@ -29,10 +29,10 @@ async def create_category(
     return category
 
 
-@category_router.patch("/update/{category_id}", status_code=status.HTTP_200_OK)
+@category_router.patch("/update/{category_id}", status_code=status.HTTP_200_OK, response_model=FullResponseCategorySchema)
 async def patch_category(
     category_id: int,
-    category_data: CategorySchema,
+    category_data: InputCategorySchema,
     session: AsyncSession=Depends(get_db),
     permission: bool=Depends(RoleChecker([Roles2.admin])),
 ):
@@ -46,10 +46,10 @@ async def delete_category(
     session: AsyncSession=Depends(get_db),
     permission: bool=Depends(RoleChecker([Roles2.admin])),
 ):
-    await category_service.delete_instance(category_id, session)
+    return await category_service.delete_instance(category_id, session)
 
 
-@category_router.get("/get/{category_id}", status_code=status.HTTP_200_OK)
+@category_router.get("/get/{category_id}", status_code=status.HTTP_200_OK, response_model=FullResponseCategorySchema)
 async def get_category(
     category_id: int,
     session: AsyncSession=Depends(get_db),
@@ -66,7 +66,7 @@ async def get_all_category(
     categories = await category_service.get_all_instance(page, session)
     total_count = await category_service.get_total_count(session)
     data = [
-        jsonable_encoder(ResponseCategorySchema(
+        jsonable_encoder(ShortResponseCategorySchema(
             category_name=category["category_name"], 
             category_id=category["category_id"]
         ))

@@ -8,12 +8,18 @@ class BaseCategorySchema(BaseModel):
     category_name: str
 
 
-class CategorySchema(BaseCategorySchema):
+class InputCategorySchema(BaseCategorySchema):
     category_description: Optional[str]=None
     keywords: Optional[str]=None
 
-class ResponseCategorySchema(BaseCategorySchema):
+
+class ShortResponseCategorySchema(BaseCategorySchema):
     category_id: int
 
+
+class FullResponseCategorySchema(InputCategorySchema, ShortResponseCategorySchema):
+    pass
+
+
 class CategoryPagedResponseSchema(PagedResponseSchema):
-    data: List[ResponseCategorySchema]
+    data: List[ShortResponseCategorySchema]

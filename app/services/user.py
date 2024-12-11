@@ -105,14 +105,14 @@ class UserService(BaseService):
             "password_hash": full_user_data.get("password_hash"),
             "role": Roles2[full_user_data.get("role")],
         }
-        new_user = await self.repository.create_instance(user_data, session)
+        new_user = await self.repository.create_instance(session, **user_data)
         if user_data["role"] == Roles2.student:
             student_data = {
                 "user_id": new_user.user_id,
                 "subscription_plan": full_user_data.get("subscription_plan"),
                 "learning_style": full_user_data.get("learning_style"),
             }
-            student = await self.student_repository.create_instance(student_data, session)
+            student = await self.student_repository.create_instance(session, **student_data)
             new_user.student = student
         elif user_data["role"] == Roles2.instructor:
             instructor_data = {
@@ -122,15 +122,15 @@ class UserService(BaseService):
                 "academical_experience": full_user_data.get("academical_experience"),
                 "H_index": full_user_data.get("H_index"),
             }
-            instructor = await self.instructor_repository.create_instance(instructor_data, session)
+            instructor = await self.instructor_repository.create_instance(session, **instructor_data)
             new_user.instructor = instructor
         return new_user
     
     async def marking_tokens_as_expired(
-            self, 
-            refresh_token_data: dict,
-            access_token_data: str,
-            session: AsyncSession,        
+        self, 
+        refresh_token_data: dict,
+        access_token_data: str,
+        session: AsyncSession,        
     ) -> None:
         await self.repository.remove_refresh_token(refresh_token_data["token"], session)
         refresh_token_data.pop("token")

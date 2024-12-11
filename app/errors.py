@@ -50,7 +50,7 @@ class InsufficientPermission(CourcesException):
 class InstanceDoesntExists(CourcesException):
     """Instance doesn't exist error."""
     
-    def __init__(self, message: str = "Instance with this id doesn't exist"):
+    def __init__(self, message: str = "xui with this id doesn't exist"):
         super().__init__(message=message)
 
 
@@ -60,8 +60,13 @@ def create_exception_handler(
 
     async def exception_handler(request: Request, exc: CourcesException):
         if hasattr(exc, "message") and exc.message is not None:
-            initial_detail["message"] = initial_detail["message"].replace("Instance", exc.message)
-            initial_detail["resolution"] = initial_detail["resolution"].replace("entity", (exc.message).lower())
+            splited_message = initial_detail["message"].split()
+            splited_message[0] = exc.message
+            initial_detail["message"] = " ".join(splited_message)
+
+            splited_message = initial_detail["resolution"].split()
+            splited_message[3] = exc.message.lower()
+            initial_detail["resolution"] = " ".join(splited_message)
         return JSONResponse(status_code=status_code, content=initial_detail)
 
     return exception_handler

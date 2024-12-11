@@ -27,21 +27,21 @@ class BaseRepository:
         instance = result.scalar_one_or_none()
         return instance
 
-    async def get_instance_by_unique_field(
-            self, 
-            unique_attr: str, 
-            value: Any, 
-            session: AsyncSession
-        ) -> Optional[T]:
-        if hasattr(self.model, unique_attr):
-            statement = (
-                select(self.mode)
-                .where(self.model.unique_attr == value)
-            )
-            result = await session.execute(statement)
-            instance = result.scalar_one_or_none()
-            return instance
-        return None
+    # async def get_instance_by_unique_field(
+    #         self, 
+    #         unique_attr: str, 
+    #         value: Any, 
+    #         session: AsyncSession
+    #     ) -> Optional[T]:
+    #     if hasattr(self.model, unique_attr):
+    #         statement = (
+    #             select(self.mode)
+    #             .where(self.model.unique_attr == value)
+    #         )
+    #         result = await session.execute(statement)
+    #         instance = result.scalar_one_or_none()
+    #         return instance
+    #     return None
 
     async def get_all_instance(self, page: int , session: AsyncSession) -> List[T]:
         statement = (

@@ -38,9 +38,9 @@ class Course(Base):
     instructor_id = Column(Integer, ForeignKey('instructors.instructor_id'))
     category_id = Column(Integer, ForeignKey('category.category_id'))
 
-    course_name = Column(String)
-    cost = Column(Integer)
-    difficulty = Column(Enum(Difficulty))
+    course_name = Column(String, nullable=False)
+    cost = Column(Integer, nullable=False)
+    difficulty = Column(Enum(Difficulty), nullable=False)
 
     category = relationship('Category', back_populates='course') 
     instructor = relationship('Instructor', back_populates='course') 
