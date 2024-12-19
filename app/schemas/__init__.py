@@ -1,5 +1,5 @@
 from .user import UserResponse
-from .instructor import InstructorResponse
+from .instructor import InstructorResponse, ShortInstructorResponse
 from .student import StudentResponse
 from .category import ( 
     InputCategorySchema, 

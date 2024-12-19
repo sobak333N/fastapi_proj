@@ -1,8 +1,10 @@
+from typing import List
 from pydantic import BaseModel
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models import Course
 from app.services.base_service import BaseService
 from app.repositories import CourseRepository
 from app.services import CategoryService
@@ -34,3 +36,13 @@ class CourseService(BaseService):
             raise InsufficientPermission()
         await self.repository.delete_instance(instance, session)
         return BaseSuccessResponse(message=f"{self.model_name} was deleted")
+    
+    async def get_all_instance(
+        self, 
+        page: int, 
+        category_ids: List[int] ,
+        start_cost: int,
+        end_cost: int, 
+        session: AsyncSession,
+    ) -> List[Course]:
+        return await self.repository.get_all_instance(page, category_ids, start_cost, end_cost, session)

@@ -1,6 +1,8 @@
-from typing import Tuple, Type, Union, List
-
-from fastapi import APIRouter, Depends, status
+from typing import (
+    Tuple, Type, Union, 
+    List, Optional
+)
+from fastapi import APIRouter, Depends, status, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,36 +55,32 @@ async def delete_course(
     return await course_service.delete_instance(user.instructor.instructor_id, course_id, session)
 
 
-# @course_router.get("/", response_model=List[CourseResponse], status_code=status.HTTP_200_OK)
-# async def get_courses(
-#     session: AsyncSession,
-#     course_ids: Optional[List[int]] = Query(None),  # Список ID категорий для фильтрации
-#     min_price: Optional[float] = Query(None),  # Минимальная цена
-#     max_price: Optional[float] = Query(None),  # Максимальная цена
-#     page: int = 1,  # Страница для пагинации
-#     page_size: int = 10,  # Размер страницы
-# ):
-#     # Строим запрос с фильтрацией
-#     query = select(Course)
+@course_router.post("/", status_code=status.HTTP_200_OK, response_model=CoursePagedResponseSchema)
+async def get_courses(
+    category_ids: Optional[List[int]], 
+    start_cost: Optional[int]=0,
+    end_cost: Optional[int]=1_000_000,
+    session: AsyncSession=Depends(get_db),
+    page: int = 1,
+):
+    total_count = await course_service.get_total_count(session)
+    courses = await course_service.get_all_instance(page, category_ids, start_cost, end_cost, session)
+    data = [jsonable_encoder(course) for course in courses]
 
-#     # Фильтрация по категориям
-#     if course_ids:
-#         query = query.filter(Course.course_id.in_(course_ids))
+    page_data = CoursePagedResponseSchema(
+        data=data,
+        page=page,
+        count_on_page=len(data),
+        total_count=total_count
+    )
 
-#     # Фильтрация по цене
-#     if min_price is not None:
-#         query = query.filter(Course.price >= min_price)
-#     if max_price is not None:
-#         query = query.filter(Course.price <= max_price)
+    return page_data
 
-#     # Пагинация
-#     query = query.offset((page - 1) * page_size).limit(page_size)
 
-#     # Выполняем запрос
-#     result = await session.execute(query)
-#     courses = result.scalars().all()
-
-#     if not courses:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No courses found")
-
-#     return courses
+@course_router.get("/get/{course_id}", status_code=status.HTTP_200_OK, response_model=FullResponseCourseSchema)
+async def get_course_by_id(
+    course_id: int,
+    session: AsyncSession=Depends(get_db),
+):
+    course = await course_service.get_instance_by_pk(course_id, session)
+    return course

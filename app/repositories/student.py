@@ -15,6 +15,6 @@ from app.models import Student
 
 class StudentRepository(BaseUserRepository):
     def __init__(self):
-        return super().__init__(Student)
+        super().__init__(Student)
 
 

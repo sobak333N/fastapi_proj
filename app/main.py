@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from app.auth.routes import auth_router
-from app.api.category import category_router
-from app.api.course import course_router
+from app.api import (
+    category_router,
+    course_router,
+    instructor_router,
+)
 from .errors import register_all_errors
 # from .middleware import register_middleware
 
@@ -43,3 +46,4 @@ register_all_errors(app)
 app.include_router(auth_router, prefix=f"{version_prefix}/auth", tags=["auth"])
 app.include_router(category_router, prefix=f"{version_prefix}/category", tags=["category"])
 app.include_router(course_router, prefix=f"{version_prefix}/course", tags=["course"])
+app.include_router(instructor_router, prefix=f"{version_prefix}/instructor", tags=["instructor"])
