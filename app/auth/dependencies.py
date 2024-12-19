@@ -1,7 +1,8 @@
-from typing import Any, List, Tuple, Type
+from typing import Any, List, Tuple, Type, Optional
 from datetime import datetime, timedelta
 
 from fastapi import Depends, Request, status
+
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from fastapi.security.http import HTTPAuthorizationCredentials
@@ -12,6 +13,7 @@ from app.models.user import User, Roles2
 # from src.db.redis import token_in_blocklist
 
 from app.services.user import UserService
+from app.models import User
 from app.auth.schemas import UserCreateModel, StudentCreateModel, InstructorCreateModel
 from app.repositories.user import UserRepository
 from app.auth.utils import decode_token
@@ -27,25 +29,34 @@ user_repository = UserRepository()
 
 
 class AccessTokenDepends(HTTPBearer):
-    def __init__(self, auto_error=True):
+    def __init__(self, auto_error: bool=True, required_auth: bool=True):
+        self.required_auth = required_auth
         return super().__init__(auto_error=auto_error)
     
-    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:
+    async def __call__(
+        self, 
+        request: Request,
+    ) -> Optional[HTTPAuthorizationCredentials]:
         creds = await super().__call__(request)
+        if not creds:
+            return None
         token = creds.credentials
         token_data = decode_token(token)
         if token_data is None:
-            raise AccessTokenRequired()
+            return None if self.required_auth else self._raise_access_token_required()
 
         #  redis check jti
         token_in_blocklist = await user_service.token_in_blocklist(token_data["jti"])
         if token_in_blocklist:
-            raise AccessTokenRequired()
+            return None if self.required_auth else self._raise_access_token_required()
         if token_data["refresh"] is True:
-            raise AccessTokenRequired()
+            return None if self.required_auth else self._raise_access_token_required()
         if datetime.fromtimestamp(token_data["exp"]) < datetime.now():
-            raise AccessTokenRequired()
+            return None if self.required_auth else self._raise_access_token_required()
         return token_data
+
+    def _raise_access_token_required(self):
+        raise AccessTokenRequired()
 
 
 class RefreshTokenDepends:
@@ -83,7 +94,18 @@ class RefreshTokenDepends:
 async def get_current_user(
     token_details: dict = Depends(AccessTokenDepends()),
     session: AsyncSession = Depends(get_db),
-):
+):    
+    user_email = token_details["user"]["email"]
+    user = await user_repository.get_user_by_email(user_email, session)
+    return user
+
+
+async def not_required_get_current_user(
+    token_details: dict = Depends(AccessTokenDepends(auto_error=False, required_auth=False)),
+    session: AsyncSession = Depends(get_db),
+) -> Optional[User]:    
+    if not token_details:
+        return None
     user_email = token_details["user"]["email"]
     user = await user_repository.get_user_by_email(user_email, session)
     return user

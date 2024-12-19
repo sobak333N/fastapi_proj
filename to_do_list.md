@@ -1,2 +1,2 @@
-1) refresh tokens when programm reloads
-2) lessons field in course
+1) lessons field in course
+2) architecture lesson_student

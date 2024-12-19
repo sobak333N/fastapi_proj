@@ -1,6 +1,6 @@
 from typing import (
     Tuple, Type, Union, 
-    List, Optional
+    List, Optional, Dict
 )
 from fastapi import APIRouter, Depends, status, Query
 from fastapi.encoders import jsonable_encoder
@@ -9,10 +9,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas import (
     InputCourseSchema, ShortResponseCourseSchema,
     FullResponseCourseSchema, CoursePagedResponseSchema, 
+    PrivateResponseCourseSchema,
 )
 from app.core.db import get_db
-from app.auth.dependencies import RoleChecker, get_current_user
+from app.auth.dependencies import (
+    RoleChecker, get_current_user,
+    not_required_get_current_user,
+)
 from app.models.user import Roles2, User
+from app.models import Course
 from app.services import CourseService
 
 
@@ -28,7 +33,7 @@ async def create_course(
     permission: bool=Depends(RoleChecker([Roles2.instructor])),
 ):
     course_data.instructor_id = user.instructor.instructor_id
-    course = await course_service.create_instance(course_data, session)
+    course: Course = await course_service.create_instance(course_data, session)
     return course
 
 
@@ -41,7 +46,7 @@ async def patch_course(
     permission: bool=Depends(RoleChecker([Roles2.instructor])),
 ):
     course_data.instructor_id = user.instructor.instructor_id
-    updated_course = await course_service.patch_instance(course_id, course_data, session)
+    updated_course: Course = await course_service.patch_instance(course_id, course_data, session)
     return updated_course
 
 
@@ -63,11 +68,11 @@ async def get_courses(
     session: AsyncSession=Depends(get_db),
     page: int = 1,
 ):
-    total_count = await course_service.get_total_count(session)
-    courses = await course_service.get_all_instance(page, category_ids, start_cost, end_cost, session)
-    data = [jsonable_encoder(course) for course in courses]
+    total_count: int = await course_service.get_total_count(session)
+    courses: Course = await course_service.get_all_instance(page, category_ids, start_cost, end_cost, session)
+    data: List[Dict] = [jsonable_encoder(course) for course in courses]
 
-    page_data = CoursePagedResponseSchema(
+    page_data: CoursePagedResponseSchema = CoursePagedResponseSchema(
         data=data,
         page=page,
         count_on_page=len(data),
@@ -77,10 +82,16 @@ async def get_courses(
     return page_data
 
 
-@course_router.get("/get/{course_id}", status_code=status.HTTP_200_OK, response_model=FullResponseCourseSchema)
+@course_router.get(
+    "/get/{course_id}", 
+    status_code=status.HTTP_200_OK, 
+    response_model=PrivateResponseCourseSchema
+)
 async def get_course_by_id(
     course_id: int,
     session: AsyncSession=Depends(get_db),
+    user: User=Depends(not_required_get_current_user)
 ):
-    course = await course_service.get_instance_by_pk(course_id, session)
+    print(user)
+    course: Course = await course_service.get_instance_by_pk(course_id, user, session)
     return course

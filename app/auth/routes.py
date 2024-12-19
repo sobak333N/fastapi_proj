@@ -129,7 +129,7 @@ async def current_user(user: User=Depends(get_current_user)):
 @auth_router.post("/change-password")
 async def current_user(
     passwords: PasswordResetConfirmModel,
-    user: User=Depends(get_current_user),   
+    user: User=Depends(get_current_user),
     session: AsyncSession=Depends(get_db), 
 ):
     await user_service.change_password(passwords.old_password, passwords.new_password, user, session)

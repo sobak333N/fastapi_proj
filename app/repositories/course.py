@@ -4,7 +4,8 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .base_repository import BaseRepository
-from app.models import Course
+from app.models import Course, User, StudentCourse
+from app.models.course import PaymentStatus
 from app.config import Config
 
 
@@ -30,3 +31,21 @@ class CourseRepository(BaseRepository):
         )
         result = await session.execute(statement)
         return result.scalars().all()
+
+    async def check_access_of_user(
+        self,
+        course: Course, 
+        student_id: int,
+        session: AsyncSession,
+    ) -> bool:
+        statement = (
+            select(StudentCourse)
+            .where(StudentCourse.student_id==student_id)
+            .where(StudentCourse.course_id==course.course_id)
+        )
+        result = await session.execute(statement)
+        result = result.scalars().first()
+        if not result or result.payment_status != PaymentStatus.done:
+            return False
+        return True
+        

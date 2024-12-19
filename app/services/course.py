@@ -4,7 +4,8 @@ from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Course
+from app.models import Course, User
+from app.models.user import Roles2
 from app.services.base_service import BaseService
 from app.repositories import CourseRepository
 from app.services import CategoryService
@@ -40,9 +41,33 @@ class CourseService(BaseService):
     async def get_all_instance(
         self, 
         page: int, 
-        category_ids: List[int] ,
+        category_ids: List[int],
         start_cost: int,
         end_cost: int, 
         session: AsyncSession,
     ) -> List[Course]:
         return await self.repository.get_all_instance(page, category_ids, start_cost, end_cost, session)
+    
+    async def get_instance_by_pk(self, pk: int, user: User, session: AsyncSession):
+        course = await super().get_instance_by_pk(pk, session)
+        access = await self.check_access_to_course(course, user, session)
+        if not access:
+            print("NO ACCESS")
+            delattr(course, 'private_info')
+        return course
+    
+    async def check_access_to_course(self, course: Course, user: User, session: AsyncSession) -> bool:
+        if user:
+            if user.role == Roles2.instructor:
+                if course.instructor_id != user.instructor.instructor_id:
+                    return False
+            elif user.role == Roles2.student:
+                student_access = await self.repository.check_access_of_user(
+                    course=course, 
+                    student_id=user.student.student_id, 
+                    session=session,
+                )
+                if not student_access: 
+                    return False
+            return True
+        return False

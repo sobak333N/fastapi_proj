@@ -4,6 +4,7 @@ from app.api import (
     category_router,
     course_router,
     instructor_router,
+    student_router,
 )
 from .errors import register_all_errors
 # from .middleware import register_middleware
@@ -47,3 +48,4 @@ app.include_router(auth_router, prefix=f"{version_prefix}/auth", tags=["auth"])
 app.include_router(category_router, prefix=f"{version_prefix}/category", tags=["category"])
 app.include_router(course_router, prefix=f"{version_prefix}/course", tags=["course"])
 app.include_router(instructor_router, prefix=f"{version_prefix}/instructor", tags=["instructor"])
+app.include_router(student_router, prefix=f"{version_prefix}/student", tags=["student"])

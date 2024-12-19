@@ -34,6 +34,8 @@ class ShortResponseCourseSchema(BaseCourseSchema):
 class FullResponseCourseSchema(ShortResponseCourseSchema, InputCourseSchema):
     pass
 
+class PrivateResponseCourseSchema(FullResponseCourseSchema):
+    private_info: Optional[str]
 
 class CoursePagedResponseSchema(PagedResponseSchema):
     data: List[ShortResponseCourseSchema]

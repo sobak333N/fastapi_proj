@@ -41,6 +41,7 @@ class Course(Base):
     course_name = Column(String, nullable=False)
     cost = Column(Integer, nullable=False)
     difficulty = Column(Enum(Difficulty), nullable=False)
+    private_info = Column(String, nullable=True)
 
     category = relationship('Category', back_populates='course') 
     instructor = relationship('Instructor', back_populates='course') 
@@ -64,10 +65,10 @@ class StudentCourse(Base):
     student_id = Column(Integer, ForeignKey('students.student_id'))
     payment_type = Column(Enum(PaymentType))
     payment_status = Column(Enum(PaymentStatus))
-    progress = Column(Float)
-    finished = Column(Boolean)
-    start_date = Column(DateTime) 
-    end_date = Column(DateTime)
+    progress = Column(Float, nullable=True)
+    finished = Column(Boolean, nullable=True)
+    start_date = Column(DateTime, nullable=True) 
+    end_date = Column(DateTime, nullable=True)
 
     student = relationship('Student', back_populates='course') 
     student_lesson = relationship('StudentLesson', back_populates='student_course') 

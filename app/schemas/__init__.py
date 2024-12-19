@@ -1,6 +1,6 @@
 from .user import UserResponse
 from .instructor import InstructorResponse, ShortInstructorResponse
-from .student import StudentResponse
+from .student import StudentResponse, ShortStudentResponse
 from .category import ( 
     InputCategorySchema, 
     ShortResponseCategorySchema,
@@ -12,5 +12,6 @@ from .course import (
     ShortResponseCourseSchema,
     FullResponseCourseSchema,
     CoursePagedResponseSchema,
+    PrivateResponseCourseSchema,
 )
 from .other import PagedResponseSchema

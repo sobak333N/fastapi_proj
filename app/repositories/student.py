@@ -1,20 +1,27 @@
-# from typing import Type, TypeVar, List
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
-# from fastapi import Depends, Request, status
-# from sqlalchemy.future import select
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy import delete
-
-# from app.core.db import get_db
-# from app.models import User, RefreshToken
-# from app.auth.schemas import UserCreateModel
-# from app.auth.utils import generate_passwd_hash
 from app.repositories.user import BaseUserRepository
-from app.models import Student
+from app.models import Student, StudentCourse
 
 
 class StudentRepository(BaseUserRepository):
     def __init__(self):
         super().__init__(Student)
 
+    async def get_instance_by_pk(self, pk: int, session: AsyncSession) -> Student:
+        statement = (
+            select(self.model)
+            .where(self.model_pk==pk)
+            .options(selectinload(self.model.user))
+        )
+        result = await session.execute(statement)
+        instance = result.scalar_one_or_none()
+        return instance
 
+    async def add_to_course(self, session: AsyncSession, **student_course) -> StudentCourse:
+        new_instance = StudentCourse(**student_course)
+        session.add(new_instance)
+        await session.commit()
+        return new_instance
