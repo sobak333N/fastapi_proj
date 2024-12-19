@@ -63,6 +63,9 @@ class RefreshTokenDepends:
         if not token_data:
             raise RefreshTokenRequired()
 
+        print(token_data)
+        print(token)
+
 #       validate token in db
         refresh_token_in_whitelist = await user_repository.refresh_token_exists(token, session)
         if not refresh_token_in_whitelist:

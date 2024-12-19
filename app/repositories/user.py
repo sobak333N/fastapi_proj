@@ -65,6 +65,7 @@ class UserRepository(BaseRepository):
     async def refresh_token_exists(self, refresh_token: str, session: AsyncSession) -> bool:
         statement = select(RefreshToken).where(RefreshToken.refresh_token == refresh_token)
         result = await session.execute(statement)
+        result = result.scalars().first()
         return result is not None
     
 
