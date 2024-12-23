@@ -9,7 +9,7 @@ services:
       - .env
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: app.Dockerfile
     ports:
       - 8000:8000
     depends_on:
@@ -56,6 +56,30 @@ services:
       - app-network
     ports:
       - ${REDIS_OUTER_PORT}:${REDIS_INNER_PORT}
+
+  test:
+    build:
+      context: .
+      dockerfile: test.Dockerfile
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+    command: >
+      bash -c "
+      if [ \"$TESTING\" = \"TRUE\" ]; then
+        alembic upgrade head &&
+        pytest --disable-warnings --maxfail=1 --tb=short  
+      else
+        echo 'TESTING=FALSE'
+      fi
+      "
+
 
 volumes:
   db_data:

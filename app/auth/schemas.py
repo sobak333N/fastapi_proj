@@ -1,7 +1,11 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel, Field, root_validator
+from typing import List, Optional, Dict, Any
+from pydantic import (
+    BaseModel, Field, ValidationError,
+    field_validator, model_validator
+)
+from pydantic_core import PydanticCustomError
 
 from app.models.user import Roles2
 from app.models.student import SubscriptionPlan, LearningStyle
@@ -64,31 +68,42 @@ class UserCreateModel(BaseModel):
     password: str = Field(min_length=6)
     role: Roles2
 
-    @root_validator(pre=True)
-    def validate(cls, values):
-        role = values.get("role")
-        email = values.get("email")
-        password = values.get("password")
+    @field_validator("role")
+    def validate_role(cls, role: str):
         if role == "admin":
-            raise ValueError("Error")
+            raise PydanticCustomError(
+                "value_error.role",
+                "Role admin is not allowed", 
+                {"input": role, "expected": "student/instructor"}
+            )
+        return role
+
+    @field_validator("email")
+    def validate_email(cls, email: str):
         validate_email(email)
+        return email
+
+    @field_validator("password")
+    def validate_password(cls, password: str):
         validate_password(password)
-        return values
+        return password
 
 
 class StudentCreateModel(UserCreateModel):
     subscription_plan: Optional[SubscriptionPlan] = None
-    # subscription_plan: Optional[SubscriptionPlan] = None
     learning_style: Optional[LearningStyle] = None
 
     model_config = student_config
 
-    @root_validator(pre=True)
-    def validate_student(cls, values):
-        role = values.get("role")
+    @field_validator("role")
+    def validate_instructor_role(cls, role: str):
         if role != "student":
-            raise ValueError("not student fields")
-        return values
+            raise PydanticCustomError(
+                "value_error.role",
+                "Role must be 'student'", 
+                {"input": role, "expected": "student"}
+            )
+        return role 
 
 
 class InstructorCreateModel(UserCreateModel):
@@ -99,29 +114,28 @@ class InstructorCreateModel(UserCreateModel):
 
     model_config = instructor_config
 
-    @root_validator(pre=True)
-    def validate_instructor(cls, values):
-        role = values.get("role")
+    @field_validator("role")
+    def validate_instructor_role(cls, role: str):
         if role != "instructor":
-            raise ValueError("not instructor fields")
-        return values
-        
+            raise PydanticCustomError(
+                "value_error.role",
+                "Role must be 'instructor'", 
+                {"input": role, "expected": "instructor"}
+            )
+        return role 
+
 
 class AdminCreateModel(UserCreateModel):
-    @root_validator(pre=True)
-    def validate(cls, values):
-        email = values.get("email")
-        password = values.get("password")
-        validate_email(email)
-        validate_password(password)
-        return values
-    
-    @root_validator(pre=True)
-    def validate_admin(cls, values):
-        role = values.get("role")
+
+    @field_validator("role")
+    def validate_instructor_role(cls, role: str):
         if role != "admin":
-            raise ValueError("not admin fields")
-        return values
+            raise PydanticCustomError(
+                "value_error.role",
+                "Role must be 'admin'", 
+                {"input": role, "expected": "admin"}
+            )
+        return role 
         
 
 
@@ -133,11 +147,10 @@ class UserLoginModel(BaseModel):
 class PasswordResetRequestModel(BaseModel):
     email: str = Field(max_length=40)
 
-    @root_validator(pre=True)
-    def validate(cls, values):
-        email = values.get("email")
+    @field_validator("email")
+    def validate_email(cls, email: str):
         validate_email(email)
-        return values
+        return email
 
 
 class PasswordResetConfirmModel(BaseModel):
@@ -145,11 +158,14 @@ class PasswordResetConfirmModel(BaseModel):
     new_password: str
     confirm_new_password: str
 
-    @root_validator(pre=True)
-    def validate(cls, values):
-        new_password = values.get('new_password')
-        confirm_new_password = values.get('confirm_new_password')
+    @model_validator(mode="after")
+    def validate_passwords(cls, values):
+        new_password = values.new_password
+        confirm_new_password = values.confirm_new_password
+
         if new_password != confirm_new_password:
             raise ValueError("Passwords are not equal")
+
         validate_password(new_password)
         return values
+    

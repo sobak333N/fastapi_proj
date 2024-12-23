@@ -1,0 +1,42 @@
+{
+    "valid": [
+      {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "john.doe@student.com",
+        "password": "securePass123--",
+        "role": "student",
+        "learning_style": "visual",
+        "subscription_plan": "premium"
+      },
+      {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "sosalka@student.com",
+        "password": "securePass123_",
+        "role": "student",
+        "learning_style": "visual",
+        "subscription_plan": "premium"
+      },
+      {
+        "first_name": "MAMA",
+        "last_name": "Doe",
+        "email": "robert@student.com",
+        "password": "securePass123-",
+        "role": "student",
+        "learning_style": "visual",
+        "subscription_plan": "premium"
+      }
+    ],
+    "invalid": [
+        {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe.com",
+            "password": "securePass123--",
+            "role": "student",
+            "learning_style": "visual",
+            "subscription_plan": "premium"
+          } 
+    ]
+}
