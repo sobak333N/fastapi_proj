@@ -69,7 +69,6 @@ def decode_token(token: str) -> dict:
         return token_data
 
     except jwt.PyJWTError as e:
-        logging.exception(e)
         return None
 
 

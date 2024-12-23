@@ -1,8 +1,115 @@
 {
-    "valid": [
+  "endpoint": "/auth/signup/student",
+  "valid": [
+    {
+      "birthdate": "2004-08-06",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@student.com",
+      "password": "securePass123--",
+      "role": "student",
+      "learning_style": "visual",
+      "subscription_plan": "premium"
+    },
+    {
+      "birthdate": "2004-08-06",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "sosalka@student.com",
+      "password": "securePass123_",
+      "role": "student",
+      "learning_style": "visual",
+      "subscription_plan": "premium"
+    },
+    {
+      "birthdate": "2004-08-06",
+      "first_name": "MAMA",
+      "last_name": "Doe",
+      "email": "robert@student.com",
+      "password": "securePass123-",
+      "role": "student",
+      "learning_style": "visual",
+      "subscription_plan": "premium"
+    }
+  ],
+  "invalid": [
       {
+        "locs": ["email", "password", "role"],
+        "birthdate": "2004-08-06",
         "first_name": "John",
         "last_name": "Doe",
+        "email": "john.doe.com",
+        "password": "securePass123",
+        "role": "instructor",
+        "learning_style": "visual",
+        "subscription_plan": "premium"
+      },
+      {
+        "locs": ["email"],
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "john.doe.com",
+        "password": "securePass123--",
+        "role": "student",
+        "learning_style": "visual",
+        "subscription_plan": "premium"
+      },
+      {
+        "locs": ["password", "birthdate"],
+        "birthdate": "2004_08_06",
+        "first_name": "Anna",
+        "last_name": "Smith",
+        "email": "anna.smith@student.com",
+        "password": "short",
+        "role": "student",
+        "learning_style": "visual",
+        "subscription_plan": "premium"
+      },
+      {
+        "locs": ["role"],
+        "birthdate": null,
+        "first_name": "Bob",
+        "last_name": "Brown",
+        "email": "bob.brown@student.com",
+        "password": "securePass123--",
+        "role": "admin",
+        "learning_style": "visual",
+        "subscription_plan": "premium"
+      },
+      {
+        "locs": ["learning_style"],
+        "first_name": "Eve",
+        "last_name": "White",
+        "email": "eve.white@student.com",
+        "password": "securePass123--",
+        "role": "student",
+        "learning_style": "unknown_style",
+        "subscription_plan": "premium"
+      },
+      {
+        "locs": ["subscription_plan"],
+        "first_name": "Alice",
+        "last_name": "Green",
+        "email": "alice.green@student.com",
+        "password": "securePass123--",
+        "role": "student",
+        "learning_style": "visual",
+        "subscription_plan": "unknown_plan"
+      },
+      {
+        "locs": ["email", "password"],
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "invalid-email",
+        "password": "weak",
+        "role": "student",
+        "learning_style": "visual",
+        "subscription_plan": "free"
+      },
+      {
+        "locs": ["first_name", "last_name"],
+        "first_name": " ",
+        "last_name": "",
         "email": "john.doe@student.com",
         "password": "securePass123--",
         "role": "student",
@@ -10,33 +117,25 @@
         "subscription_plan": "premium"
       },
       {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "sosalka@student.com",
-        "password": "securePass123_",
-        "role": "student",
+        "locs": ["password", "role"],
+        "first_name": "Tom",
+        "last_name": "Black",
+        "email": "tom.black@student.com",
+        "password": "Pass123",
+        "role": "teacher",
         "learning_style": "visual",
         "subscription_plan": "premium"
       },
       {
-        "first_name": "MAMA",
-        "last_name": "Doe",
-        "email": "robert@student.com",
-        "password": "securePass123-",
+        "locs": ["email", "first_name", "birthdate"],
+        "birthdate": "",
+        "first_name": null,
+        "last_name": "Brown",
+        "email": "",
+        "password": "securePass123--",
         "role": "student",
         "learning_style": "visual",
-        "subscription_plan": "premium"
+        "subscription_plan": null
       }
-    ],
-    "invalid": [
-        {
-            "first_name": "John",
-            "last_name": "Doe",
-            "email": "john.doe.com",
-            "password": "securePass123--",
-            "role": "student",
-            "learning_style": "visual",
-            "subscription_plan": "premium"
-          } 
-    ]
+  ]
 }

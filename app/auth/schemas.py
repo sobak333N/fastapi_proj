@@ -60,13 +60,22 @@ admin_config = {
 }
 
 class UserCreateModel(BaseModel):
-    first_name: str = Field(max_length=25)
-    last_name: str = Field(max_length=25)
+    first_name: str = Field(min_length=1, max_length=25)
+    last_name: str = Field(min_length=1, max_length=25)
     second_name: Optional[str] = None
     birthdate: Optional[datetime] = None
     email: str = Field(max_length=40)
-    password: str = Field(min_length=6)
+    password: str = Field(min_length=6, max_length=128)
     role: Roles2
+
+    @field_validator("first_name", "last_name")
+    def validate_non_empty(cls, value: str, info):
+        if not value.strip():
+            raise PydanticCustomError(
+                f"value_error.non_empty",
+                f"{info.field_name} cannot be empty or only whitespace", 
+                {"input": value, "expected": "non empty"}
+            )
 
     @field_validator("role")
     def validate_role(cls, role: str):
@@ -74,7 +83,7 @@ class UserCreateModel(BaseModel):
             raise PydanticCustomError(
                 "value_error.role",
                 "Role admin is not allowed", 
-                {"input": role, "expected": "student/instructor"}
+                {"input": role, "expected": "student|instructor"}
             )
         return role
 
@@ -96,8 +105,8 @@ class StudentCreateModel(UserCreateModel):
     model_config = student_config
 
     @field_validator("role")
-    def validate_instructor_role(cls, role: str):
-        if role != "student":
+    def validate_student_role(cls, role: Roles2):
+        if role != Roles2.student:
             raise PydanticCustomError(
                 "value_error.role",
                 "Role must be 'student'", 
@@ -107,16 +116,26 @@ class StudentCreateModel(UserCreateModel):
 
 
 class InstructorCreateModel(UserCreateModel):
-    education: str = Field(max_length=30)
+    education: str = Field(min_length=1, max_length=30)
     academic_degree: AcademicDegree
-    academical_experience: int
+    academical_experience: int = Field(gt=0)
     H_index: Optional[float] = None
 
     model_config = instructor_config
 
+    @field_validator("H_index")
+    def validate_H_index(cls, H_index: str):
+        if H_index and H_index < 0:
+            raise PydanticCustomError(
+                "value_error.H_index",
+                "H_index should be greater than 0", 
+                {"input": H_index, "expected": "greater than 0"}
+            )
+        return H_index 
+
     @field_validator("role")
     def validate_instructor_role(cls, role: str):
-        if role != "instructor":
+        if role != Roles2.instructor:
             raise PydanticCustomError(
                 "value_error.role",
                 "Role must be 'instructor'", 
@@ -128,8 +147,8 @@ class InstructorCreateModel(UserCreateModel):
 class AdminCreateModel(UserCreateModel):
 
     @field_validator("role")
-    def validate_instructor_role(cls, role: str):
-        if role != "admin":
+    def validate_admin_role(cls, role: str):
+        if role != Roles2.admin:
             raise PydanticCustomError(
                 "value_error.role",
                 "Role must be 'admin'", 

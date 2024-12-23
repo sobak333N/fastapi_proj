@@ -43,16 +43,15 @@ class AccessTokenDepends(HTTPBearer):
         token = creds.credentials
         token_data = decode_token(token)
         if token_data is None:
-            return None if self.required_auth else self._raise_access_token_required()
-
+            return self._raise_access_token_required() if self.required_auth else None
         #  redis check jti
         token_in_blocklist = await user_service.token_in_blocklist(token_data["jti"])
         if token_in_blocklist:
-            return None if self.required_auth else self._raise_access_token_required()
+            return self._raise_access_token_required() if self.required_auth else None
         if token_data["refresh"] is True:
-            return None if self.required_auth else self._raise_access_token_required()
+            return self._raise_access_token_required() if self.required_auth else None
         if datetime.fromtimestamp(token_data["exp"]) < datetime.now():
-            return None if self.required_auth else self._raise_access_token_required()
+            return self._raise_access_token_required() if self.required_auth else None
         return token_data
 
     def _raise_access_token_required(self):

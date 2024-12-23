@@ -66,15 +66,23 @@ services:
     env_file:
       - .env
     depends_on:
+      - app
       - db
       - redis
     networks:
+      # - test-network
       - app-network
+    logging:
+      driver: "none"  # Отключает сбор логов
     command: >
       bash -c "
+      sleep 1 &&
       if [ \"$TESTING\" = \"TRUE\" ]; then
         alembic upgrade head &&
         pytest --disable-warnings --maxfail=1 --tb=short  
+      elif [ \"$TESTING\" = \"LOGS\" ]; then
+        alembic upgrade head &&
+        pytest -s --maxfail=1 --tb=short 
       else
         echo 'TESTING=FALSE'
       fi
@@ -85,5 +93,7 @@ volumes:
   db_data:
 
 networks:
+  test-network:
+    driver: bridge
   app-network:
     driver: bridge
