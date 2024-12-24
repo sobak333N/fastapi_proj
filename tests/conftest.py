@@ -90,3 +90,7 @@ def credentials():
 @pytest.fixture
 def passwords():
     return load_test_data("auth/passwords.json")
+
+@pytest.fixture
+def create_admin():
+    return load_test_data("auth/create_admin.json")

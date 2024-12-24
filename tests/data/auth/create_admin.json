@@ -1,0 +1,115 @@
+{
+    "endpoint": "/auth/signup/admin",
+    "valid": [
+      {
+        "first_name": "Alice",
+        "last_name": "Johnson",
+        "second_name": "Marie",
+        "birthdate": "1985-08-15",
+        "email": "alice.johnson@admin.com",
+        "password": "StrongPassword123!",
+        "role": "admin"
+      },
+      {
+        "first_name": "John",
+        "last_name": "Doe",
+        "second_name": null,
+        "birthdate": "1990-05-15",
+        "email": "john.doe@admin.com",
+        "password": "ValidPassword456!",
+        "role": "admin"
+      },
+      {
+        "first_name": "Jane",
+        "last_name": "Smith",
+        "second_name": "Marie",
+        "birthdate": null,
+        "email": "jane.smith@admin.com",
+        "password": "AdminPass123!",
+        "role": "admin"
+      }
+    ],
+    "invalid": [
+      {
+        "locs": ["role"],
+        "first_name": "Alice",
+        "last_name": "Johnson",
+        "second_name": null,
+        "birthdate": "1985-08-15",
+        "email": "alice.johnson@admin.com",
+        "password": "StrongPassword123!",
+        "role": "instructor"
+      },
+      {
+        "locs": ["email"],
+        "first_name": "John",
+        "last_name": "Doe",
+        "second_name": null,
+        "birthdate": "1990-05-15",
+        "email": "invalid-email",
+        "password": "ValidPassword456!",
+        "role": "admin"
+      },
+      {
+        "locs": ["password"],
+        "first_name": "Jane",
+        "last_name": "Smith",
+        "second_name": null,
+        "birthdate": null,
+        "email": "jane.smith@admin.com",
+        "password": "short",
+        "role": "admin"
+      },
+      {
+        "locs": ["first_name", "last_name"],
+        "first_name": "  ",
+        "last_name": "",
+        "second_name": null,
+        "birthdate": "1985-07-21",
+        "email": "test.user@admin.com",
+        "password": "ValidPass123!",
+        "role": "admin"
+      },
+      {
+        "locs": ["role", "birthdate"],
+        "first_name": "Bob",
+        "last_name": "Smith",
+        "second_name": null,
+        "birthdate": "1990ss-05-15",
+        "email": "bob.smith@instructor.com",
+        "password": "AdminPassword123!",
+        "role": "instructor"
+      },
+      {
+        "locs": ["first_name"],
+        "first_name": "",
+        "last_name": "Doe",
+        "second_name": null,
+        "birthdate": "1980-05-15",
+        "email": "john.doe@admin.com",
+        "password": "StrongPassword456!",
+        "role": "admin"
+      },
+      {
+        "locs": ["birthdate"],
+        "first_name": "Mia",
+        "last_name": "Black",
+        "second_name": null,
+        "birthdate": "invalid-date",
+        "email": "mia.black@admin.com",
+        "password": "SecurePassword123!",
+        "role": "admin"
+      },
+      {
+        "locs": ["first_name", "last_name", "password"],
+        "first_name": "    ",
+        "last_name": "",
+        "second_name": "Lee",
+        "birthdate": "1990-01-01",
+        "email": "invalid.user@admin.com",
+        "password": "123",
+        "role": "admin"
+      }
+    ]
+  }
+  
