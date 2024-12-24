@@ -6,12 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .base_repository import BaseRepository
 from app.models import Category
 from app.config import Config
+from app.repositories.redis import RedisCategory
 
 
 class CategoryRepository(BaseRepository):
     def __init__(self):
         super().__init__(Category)
-    
+
+    @RedisCategory.cache("category_page_")
     async def get_all_instance(self, page: int, session: AsyncSession) -> List[Category]:
         statement = (
             select(Category.category_id, Category.category_name)
