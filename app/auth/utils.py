@@ -4,6 +4,8 @@ import uuid
 import string
 import random
 import jwt
+import base64
+
 from typing import Tuple
 from datetime import datetime, timedelta
 from fastapi.encoders import jsonable_encoder
@@ -33,12 +35,19 @@ def validate_password(password: str) -> bool:
         raise ValueError("Pass must contain at least 1 special symbol")
     return True
 
+
 def generate_passwd_hash(password: str) -> str:
     return passwd_context.hash(password)
 
 
 def verify_password(password: str, hash: str) -> bool:
     return passwd_context.verify(password, hash)
+
+
+def encode_finger_print(finger_print_data: dict) -> str:
+    finger_print_data_str = f"{finger_print_data['user_agent']}|{finger_print_data['ip']}"
+    print(base64.b64encode(finger_print_data_str.encode()).decode())
+    return base64.b64encode(finger_print_data_str.encode()).decode()
 
 
 def create_token(user_data: dict, refresh: bool = False) -> Tuple[str, datetime]:

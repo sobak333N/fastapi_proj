@@ -36,9 +36,16 @@ async def test_auth_tokens(test_data, request):
         assert set_cookie_header is not None, "Set-Cookie header is missing"
         refresh_token = [cookie.split("=")[1].split(";")[0] for cookie in set_cookie_header.split(",") if "refresh_token" in cookie][0]
         access_token = response.headers["Authorization"]
+        old_refresh_token = refresh_token
 
-        logger.critical(refresh_token)
-        logger.critical(access_token)
+        response = await async_client.post("/auth/login", json=valid_payload)
+        assert response.status_code == 200
+
+        set_cookie_header = response.headers.get("set-cookie")
+        assert set_cookie_header is not None, "Set-Cookie header is missing"
+        refresh_token = [cookie.split("=")[1].split(";")[0] for cookie in set_cookie_header.split(",") if "refresh_token" in cookie][0]
+        assert old_refresh_token == refresh_token
+
 
 
         #  current-user TESTS
@@ -81,10 +88,9 @@ async def test_auth_tokens(test_data, request):
         #     headers={"Authorization": access_token}
         # )
         # assert response.status_code == 401
-        # logger.critical(response.__dict__)
 
 
-        #REFRESH_TOKEN
+        # REFRESH_TOKEN
 
         response = await async_client.post(
             "/auth/refresh", 

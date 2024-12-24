@@ -28,6 +28,24 @@ user_service = UserService()
 user_repository = UserRepository()
 
 
+class FingerPrint:
+    def __init__(self):
+        pass
+
+    def __call__(
+        self, 
+        request: Request,
+    ) -> Optional[dict]:
+        client_ip =request.client.host
+        forwarded_ip =request.headers.get("x-forwarded-for")
+        real_ip =request.headers.get("x-real-ip")
+        ip = forwarded_ip if forwarded_ip else real_ip
+
+        user_agent = request.headers.get("user-agent")
+
+        return {"user_agent": user_agent, "ip": ip}
+
+
 class AccessTokenDepends(HTTPBearer):
     def __init__(self, auto_error: bool=True, required_auth: bool=True):
         self.required_auth = required_auth

@@ -67,7 +67,13 @@ class UserRepository(BaseRepository):
         result = await session.execute(statement)
         result = result.scalars().first()
         return result is not None
-    
+
+    async def finger_print_exists(self, finger_print: str, session: AsyncSession) -> RefreshToken:
+        statement = select(RefreshToken).where(RefreshToken.finger_print == finger_print)
+        result = await session.execute(statement)
+        result = result.scalars().first()
+        return result
+
 
 class BaseUserRepository(BaseRepository):
     async def get_by_user_id(self, user_id: int, session: AsyncSession) -> T:

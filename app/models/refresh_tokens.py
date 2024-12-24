@@ -25,5 +25,7 @@ class RefreshToken(Base):
 
     __table_args__ = (
         Index('idx_refresh_token_user_id', 'user_id'),
+        Index('idx_refresh_token_refresh_token', 'refresh_token', postgresql_using="hash"),
+        Index('idx_refresh_token_finger_print', 'finger_print', postgresql_using="hash"),
     )
     primary_key = 'refresh_token_id'

@@ -11,7 +11,7 @@ from app.models.user import User, Roles2
 from app.schemas import UserResponse, InstructorResponse, StudentResponse
 from app.repositories import UserRepository
 from app.services import UserService
-from app.auth.utils import create_token
+from app.auth.utils import create_token, encode_finger_print
 from app.auth.schemas import (
     StudentCreateModel,
     InstructorCreateModel,
@@ -46,7 +46,7 @@ class AuthService:
             return UserResponse(**user.__dict__)
 
 
-    async def create_auth_response(self, user: User, session: AsyncSession):
+    async def create_auth_response(self, user: User, finger_print_data: dict, session: AsyncSession):
         access_token, _ = create_token(
             user_data={
                 "user_id": user.user_id,
@@ -55,22 +55,30 @@ class AuthService:
             },
             refresh=False
         )
-        refresh_token, refresh_exp = create_token(
-            user_data={
-                "user_id": user.user_id,
-                "email": user.email,
-            },
-            refresh=True
-        )
 
+
+        finger_print = encode_finger_print(finger_print_data)
         user_repository = UserRepository()
-        await user_repository.add_refresh_token(
-            user_id=user.user_id,
-            refresh_token=refresh_token,
-            finger_print="finger",
-            expiresIn=int(refresh_exp.timestamp()),
-            session=session
-        )
+
+        refresh_token = await user_repository.finger_print_exists(finger_print, session)
+        if not refresh_token:
+            refresh_token, refresh_exp = create_token(
+                user_data={
+                    "user_id": user.user_id,
+                    "email": user.email,
+                },
+                refresh=True
+            )
+            await user_repository.add_refresh_token(
+                user_id=user.user_id,
+                refresh_token=refresh_token,
+                finger_print=finger_print,
+                expiresIn=int(refresh_exp.timestamp()),
+                session=session
+            )
+        else:
+            refresh_token = refresh_token.refresh_token
+
         response_user_data = self.generate_differents_profile(user)
         response = JSONResponse(
             content={

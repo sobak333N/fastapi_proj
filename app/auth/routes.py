@@ -24,6 +24,7 @@ from app.auth.service import AuthService
 from app.auth.dependencies import (
     get_current_user, RefreshTokenDepends,
     AccessTokenDepends, RoleChecker,
+    FingerPrint,
 )
 from app.auth.schemas import (
     UserCreateModel,
@@ -75,7 +76,11 @@ async def verify_user_account(token: str, session: AsyncSession=Depends(get_db))
 
 
 @auth_router.post("/login")
-async def login_users(login_data: UserLoginModel, session: AsyncSession = Depends(get_db)):
+async def login_users(
+    login_data: UserLoginModel, 
+    finger_print_data: dict=Depends(FingerPrint()),
+    session: AsyncSession=Depends(get_db)
+):
     email = login_data.email
     password = login_data.password
 
@@ -84,7 +89,7 @@ async def login_users(login_data: UserLoginModel, session: AsyncSession = Depend
         # user_data = UserResponse(**user)
         password_valid = verify_password(password, user.password_hash)
         if password_valid:
-            response = await auth_service.create_auth_response(user, session)
+            response = await auth_service.create_auth_response(user, finger_print_data, session)
             return response
     raise InvalidCredentials()
 
