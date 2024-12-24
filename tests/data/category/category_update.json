@@ -1,0 +1,111 @@
+{
+    "endpoint": "/category/update",
+    "valid": [
+      {
+        "category_id": 2,
+        "payload": {
+          "category_name": "Electronics",
+          "category_description": "Updated description for Electronics",
+          "keywords": "phones"
+        }
+      },
+      {
+        "category_id": 4,
+        "payload": {
+          "category_name": "Books",
+          "category_description": "Fiction and non-fiction",
+          "keywords": "novels, educational"
+        }
+      },
+      {
+        "category_id": 88,
+        "payload": {
+          "category_name": "Clothing",
+          "category_description": null,
+          "keywords": "men, women, kids"
+        }
+      },
+      {
+        "category_id": 89,
+        "payload": {
+          "category_name": "Furniture",
+          "category_description": "Updated furniture category",
+          "keywords": null
+        }
+      },
+      {
+        "category_id": 90,
+        "payload": {
+          "category_name": "Toys",
+          "category_description": null,
+          "keywords": null
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "locs": ["category_id"],
+        "category_id": 0,
+        "payload": {
+          "category_name": "Invalid ID",
+          "category_description": "Valid description",
+          "keywords": "valid, keywords"
+        }
+      },
+      {
+        "locs": ["category_id"],
+        "category_id": -1,
+        "payload": {
+          "category_name": "Negative ID",
+          "category_description": "Valid description",
+          "keywords": "valid, keywords"
+        }
+      },
+      {
+        "locs": ["category_name"],
+        "category_id": 99,
+        "payload": {
+          "category_name": "",
+          "category_description": "Empty name test",
+          "keywords": "test"
+        }
+      },
+      {
+        "locs": ["category_description"],
+        "category_id": 99,
+        "payload": {
+          "category_name": "Valid Name",
+          "category_description": "",
+          "keywords": "valid"
+        }
+      },
+      {
+        "locs": ["keywords"],
+        "category_id": 99,
+        "payload": {
+          "category_name": "Valid Name",
+          "category_description": "Valid description",
+          "keywords": "    "
+        }
+      },
+      {
+        "locs": ["keywords"],
+        "category_id": 99,
+        "payload": {
+          "category_name": "Valid Name",
+          "category_description": "Valid description",
+          "keywords": ["invalid", "data"]
+        }
+      },
+      {
+        "locs": ["category_name", "category_description"],
+        "category_id": 102,
+        "payload": {
+          "category_name": "",
+          "category_description": "",
+          "keywords": "valid, keywords"
+        }
+      }
+    ]
+  }
+  

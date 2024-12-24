@@ -1,0 +1,57 @@
+{
+    "endpoint": "/category/create",
+    "valid": [
+      {
+        "category_name": "Electronics",
+        "category_description": "Devices and gadgets",
+        "keywords": "phones"
+      },
+      {
+        "category_name": "Books",
+        "category_description": "Fiction and non-fiction books",
+        "keywords": "novels,"
+      },
+      {
+        "category_name": "Clothing",
+        "category_description": null,
+        "keywords": "men"
+      },
+      {
+        "category_name": "Furniture",
+        "category_description": "Home and office furniture",
+        "keywords": null
+      },
+      {
+        "category_name": "Toys",
+        "category_description": null,
+        "keywords": null
+      }
+    ],
+    "invalid": [
+      {
+        "locs": ["category_name"],
+        "category_name": "",
+        "category_description": "Invalid category",
+        "keywords": "invalid"
+      },
+      {
+        "locs": ["keywords"],
+        "category_name": "Valid Name",
+        "category_description": "Valid description",
+        "keywords": ["invalid", "data"]
+      },
+      {
+        "locs": ["keywords"],
+        "category_name": "Another Name",
+        "category_description": "Valid description",
+        "keywords": 123
+      },
+      {
+        "locs": ["category_name", "category_description"],
+        "category_name": "",
+        "category_description": "  ",
+        "keywords": null
+      }
+    ]
+  }
+  

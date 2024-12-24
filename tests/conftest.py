@@ -94,3 +94,14 @@ def passwords():
 @pytest.fixture
 def create_admin():
     return load_test_data("auth/create_admin.json")
+
+
+
+@pytest.fixture
+def post_category():
+    return load_test_data("category/category_post.json")
+
+@pytest.fixture
+def update_category():
+    return load_test_data("category/category_update.json")
+
