@@ -63,8 +63,7 @@ async def get_all_category(
     session: AsyncSession=Depends(get_db),
     page: int=1,
 ):
-    categories = await category_service.get_all_instance(page, session)
-    total_count = await category_service.get_total_count(session)
+    categories, total_count = await category_service.get_page_data(page, session)
     data = [
         jsonable_encoder(ShortResponseCategorySchema(
             category_name=category["category_name"], 

@@ -7,6 +7,7 @@ from app.api import (
     student_router,
 )
 from .errors import register_all_errors
+from .task_manager import TaskManager
 # from .middleware import register_middleware
 
 
@@ -42,6 +43,9 @@ app = FastAPI(
 register_all_errors(app)
 
 # register_middleware(app)
+@app.on_event("shutdown")
+async def shutdown():
+    await TaskManager.wait_for_end()
 
 
 app.include_router(auth_router, prefix=f"{version_prefix}/auth", tags=["auth"])
@@ -49,3 +53,5 @@ app.include_router(category_router, prefix=f"{version_prefix}/category", tags=["
 app.include_router(course_router, prefix=f"{version_prefix}/course", tags=["course"])
 app.include_router(instructor_router, prefix=f"{version_prefix}/instructor", tags=["instructor"])
 app.include_router(student_router, prefix=f"{version_prefix}/student", tags=["student"])
+
+

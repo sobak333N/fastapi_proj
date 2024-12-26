@@ -1,4 +1,4 @@
-from typing import Type, Any
+from typing import Type, Any, Tuple
 from pydantic import BaseModel
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -51,3 +51,8 @@ class BaseService:
         instance = await self.get_instance_by_pk(pk, session)
         patched_instance = await self.update_instance(instance, instance_pydantic_model, session)
         return patched_instance
+
+    async def get_page_data(self, page: int, session: AsyncSession) -> Tuple:
+        all_instance = await self.get_all_instance(page, session)
+        total_count = await self.get_total_count(session)
+        return all_instance, total_count
