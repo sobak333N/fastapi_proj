@@ -92,6 +92,5 @@ async def get_course_by_id(
     session: AsyncSession=Depends(get_db),
     user: User=Depends(not_required_get_current_user)
 ):
-    print(user)
     course: Course = await course_service.get_instance_by_pk(course_id, user, session)
     return course
