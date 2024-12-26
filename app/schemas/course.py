@@ -26,18 +26,7 @@ class BaseCourseSchema(BaseModel):
 class InputCourseSchema(BaseCourseSchema):
     instructor_id: Optional[int]=None
     model_config = course_config
-
-class ShortResponseCourseSchema(BaseCourseSchema):
-    course_id: int
-    instructor_id: int
-
-
-class FullResponseCourseSchema(ShortResponseCourseSchema, InputCourseSchema):
-    pass
-
-class PrivateResponseCourseSchema(FullResponseCourseSchema):
     private_info: Optional[str] = None
-
     @field_validator("private_info", mode="after")
     def validate_private_info(cls, value: str, info):
         if value is not None and not value.strip():
@@ -47,6 +36,19 @@ class PrivateResponseCourseSchema(FullResponseCourseSchema):
                 {"input": value, "expected": "non empty"}
             )
         return value
+
+
+class ShortResponseCourseSchema(BaseCourseSchema):
+    course_id: int
+    instructor_id: int
+
+
+class FullResponseCourseSchema(ShortResponseCourseSchema):
+    pass
+
+class PrivateResponseCourseSchema(InputCourseSchema, FullResponseCourseSchema):
+    pass
+
 
 
 class CoursePagedResponseSchema(PagedResponseSchema):

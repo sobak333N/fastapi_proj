@@ -32,17 +32,17 @@ class AuthService:
 
 
     def generate_differents_profile(self, user: User):
-        if user.role == Roles2.student:
+        if user.role == Roles2.student or user.role == Roles2.student.value:
             for attr, value in user.student.__dict__.items():
                 if not attr.startswith('_'):
                     setattr(user, attr, value)
             return StudentResponse(**user.__dict__)
-        elif user.role == Roles2.instructor: 
+        elif user.role == Roles2.instructor or user.role == Roles2.instructor.value: 
             for attr, value in user.instructor.__dict__.items():
                 if not attr.startswith('_'):
                     setattr(user, attr, value)
             return InstructorResponse(**user.__dict__)
-        elif user.role == Roles2.admin: 
+        elif user.role == Roles2.admin or user.role == Roles2.admin.value: 
             return UserResponse(**user.__dict__)
 
 

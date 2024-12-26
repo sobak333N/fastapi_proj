@@ -129,7 +129,7 @@ async def refresh(
 @auth_router.post("/current-user")
 async def current_user(user: User=Depends(get_current_user)):
     return auth_service.generate_differents_profile(user)
-
+    ...
 
 @auth_router.post("/change-password")
 async def current_user(

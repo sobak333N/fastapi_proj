@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.models.user import User, Roles2
+from app.models import Instructor
 # from src.db.redis import token_in_blocklist
 
 from app.services.user import UserService

@@ -1,25 +1,71 @@
-from typing import Type, TypeVar, List
+from typing import Type, TypeVar, List, Coroutine
+from functools import wraps
+import json
 
 from fastapi import Depends, Request, status
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, noload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete
 
 from app.core.db import get_db
-from app.models import User, RefreshToken
+from app.models import User, RefreshToken, Instructor, Student
 from app.models.user import Roles2
 from app.auth.schemas import UserCreateModel
 from app.auth.utils import generate_passwd_hash
 from app.repositories.base_repository import BaseRepository
+from app.repositories.redis import RedisInstanced
 
 
 T = TypeVar('T')
+
+
+class RedisUser(RedisInstanced):
+    @classmethod
+    def get_cache(cls, key_prefix: str):
+        def inner_decorator(function: Coroutine):
+            @wraps(function)
+            async def wrapper(*args, **kwargs):
+                key_suffix: str = None
+                for arg in args:
+                    if isinstance(arg, str):
+                        key_suffix = str(arg)
+                        break    
+                key = key_prefix+key_suffix
+                instance = cls()
+                redis_client = await instance.get_redis_client()
+                result = await redis_client.get(key)
+                if result:
+                    user = json.loads(result)
+
+                    instructor_data = user.pop("instructor", None)
+                    if instructor_data:
+                        user["instructor"] = Instructor(**instructor_data)
+                    student_data = user.pop("student", None)
+                    if student_data:
+                        user["student"] = Instructor(**student_data)
+
+                    user = User(**user)
+                    return user
+
+                result = await function(*args, **kwargs)
+                await redis_client.set(
+                    name=key, 
+                    value=json.dumps((jsonable_encoder(result))),
+                    ex=60*60*24
+                )
+                return result
+            return wrapper
+        return inner_decorator 
+
+
 
 class UserRepository(BaseRepository):
     def __init__(self):
         super().__init__(User)
 
+    @RedisUser.get_cache(key_prefix="current_user")
     async def get_user_by_email(self, email: str, session: AsyncSession):
         statement = select(User).where(User.email == email)
         result = await session.execute(statement)

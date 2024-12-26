@@ -22,17 +22,17 @@ class CourseService(BaseService):
         await self.category_service.instance_exists(course_pydatinc_model.category_id, session)
         return await super().create_instance(course_pydatinc_model, session)
 
-    async def patch_instance(self, course_id: int, course_pydatinc_model: BaseModel, session: AsyncSession):
+    async def patch_instance(self, course_id: int, user: User, course_pydatinc_model: BaseModel, session: AsyncSession):
         await self.category_service.instance_exists(course_pydatinc_model.category_id, session)
-        instance = await self.get_instance_by_pk(course_id, session)
+        instance = await self.get_instance_by_pk(course_id, user, session)
         if instance.instructor_id != course_pydatinc_model.instructor_id:
             raise InsufficientPermission()
         instance_data = jsonable_encoder(course_pydatinc_model)
         patched_instance = await self.repository.update_instance(instance, session, **instance_data)
         return patched_instance
     
-    async def delete_instance(self, instructor_id: int, course_id: int, session: AsyncSession):
-        instance = await self.get_instance_by_pk(course_id, session)
+    async def delete_instance(self, instructor_id: int, user: User, course_id: int, session: AsyncSession):
+        instance = await self.get_instance_by_pk(course_id, user, session)
         if instance.instructor_id != instructor_id:
             raise InsufficientPermission()
         await self.repository.delete_instance(instance, session)

@@ -105,3 +105,11 @@ def post_category():
 def update_category():
     return load_test_data("category/category_update.json")
 
+
+@pytest.fixture
+def post_course():
+    return load_test_data("course/course_post.json")
+
+@pytest.fixture
+def update_course():
+    return load_test_data("course/course_update.json")

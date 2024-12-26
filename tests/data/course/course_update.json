@@ -1,0 +1,119 @@
+{
+    "endpoint": "course/update",
+    "valid": [
+        {
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated Math and Geometry",
+            "cost": 2200,
+            "difficulty": "easy",
+            "private_info": "Updated private note."
+        },
+        {
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated Physics Basics",
+            "cost": 1600,
+            "difficulty": "medium",
+            "private_info": null
+        },
+        {
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated Advanced Programming",
+            "cost": 2600,
+            "difficulty": "hard",
+            "private_info": "Updated details."
+        },
+        {
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated Introduction to Art",
+            "cost": 1100,
+            "difficulty": "easy",
+            "private_info": "New art course info."
+        }
+    ],
+    "invalid": [
+        {
+            "error_code": 422,
+            "locs": ["course_name"],
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "",
+            "cost": 2200,
+            "difficulty": "easy",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 422,
+            "locs": ["cost"],
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated Physics Basics",
+            "cost": -600,
+            "difficulty": "medium",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 422,
+            "locs": ["difficulty"],
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated Advanced Programming",
+            "cost": 2600,
+            "difficulty": "unknown",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 404,
+            "message": "Category with this id doesn't exist",
+            "course_id": 121,
+            "category_id": 0,
+            "course_name": "Updated Introduction to Art",
+            "cost": 1100,
+            "difficulty": "easy",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 404,
+            "message": "Course with this id doesn't exist",
+            "course_id": 0,
+            "category_id": 100,
+            "course_name": "Updated Introduction to Art",
+            "cost": 1100,
+            "difficulty": "easy",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 422,
+            "locs": ["cost"],
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated History of Science",
+            "cost": 0,
+            "difficulty": "medium",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 422,
+            "locs": ["private_info"],
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "Updated Math and Geometry",
+            "cost": 2200,
+            "difficulty": "easy",
+            "private_info": "   "
+        },
+        {
+            "error_code": 422,
+            "locs": ["private_info", "difficulty", "cost", "course_name"],
+            "course_id": 121,
+            "category_id": 100,
+            "course_name": "",
+            "cost": -1,
+            "difficulty": "",
+            "private_info": ""
+        }
+    ]
+}

@@ -46,7 +46,7 @@ async def patch_course(
     permission: bool=Depends(RoleChecker([Roles2.instructor])),
 ):
     course_data.instructor_id = user.instructor.instructor_id
-    updated_course: Course = await course_service.patch_instance(course_id, course_data, session)
+    updated_course: Course = await course_service.patch_instance(course_id, user, course_data, session)
     return updated_course
 
 

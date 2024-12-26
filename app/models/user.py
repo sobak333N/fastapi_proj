@@ -35,5 +35,6 @@ class User(Base):
 
     __table_args__ = (
         Index('idx_user_id', 'user_id'),
+        Index('idx_user_email', 'email', postgresql_using="hash"),
     )
     primary_key = 'user_id'

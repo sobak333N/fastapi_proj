@@ -1,9 +1,9 @@
 from functools import wraps
 from typing import Optional, Callable, Coroutine
-import asyncio
+import re
 import json
-import inspect
 
+from fastapi.encoders import jsonable_encoder
 import redis.asyncio as aioredis
 from redis.asyncio import Redis
 
@@ -19,10 +19,9 @@ class RedisClass:
             cls._instance = super().__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def __init__(self, db_num: int=0, key_prefix: str="example"):
+    def __init__(self, db_num: int=0):
         self.redis_client: Optional[Redis] = None
         self.db_num: int = db_num
-        self.key_prefix: str = key_prefix
 
     async def get_redis_client(self):
         if self.redis_client is None:
@@ -43,15 +42,20 @@ class RedisClass:
                 for arg in args:
                     if isinstance(arg, int):
                         key_suffix = str(arg)
-                        break
+                        break    
                 key = key_prefix+key_suffix
                 instance = cls()
                 redis_client = await instance.get_redis_client()
                 result = await redis_client.get(key)
                 if result:
                     return json.loads(result)
+
                 result = await function(*args, **kwargs)
-                await redis_client.set(name=key, value=json.dumps(result), ex=60*60*24*14)
+                await redis_client.set(
+                    name=key, 
+                    value=json.dumps((jsonable_encoder(result))),
+                    ex=60*60*24
+                )
                 return result
             return wrapper
         return inner_decorator 
@@ -62,12 +66,10 @@ class RedisClass:
 
 
 class RedisPaged(RedisClass):
-    _instance = None
 
-    def __init__(self, db_num: int=1, key_prefix: str="example"):
+    def __init__(self, db_num: int=1):
         self.redis_client: Optional[Redis] = None
         self.db_num: int = db_num
-        self.key_prefix: str = key_prefix
 
     @classmethod
     def del_cache(cls, key_prefix: str="example"):
@@ -94,6 +96,39 @@ class RedisPaged(RedisClass):
                 instance = cls()
                 redis_client = await instance.get_redis_client()
                 await TaskManager.create_task(delete_keys(key_prefix, redis_client))
+                return result
+            return wrapper
+        return inner_decorator 
+    
+
+class RedisInstanced(RedisClass):
+
+    def __init__(self, db_num: int=2):
+        self.redis_client: Optional[Redis] = None
+        self.db_num: int = db_num
+
+    @classmethod
+    def del_cache(cls, key_prefix: str="example", key_type: str='id|page'):
+        def inner_decorator(function: Coroutine):
+            @wraps(function)
+            async def wrapper(*args, **kwargs):                
+                key_suffix: str = None
+                for arg in args:
+                    if key_type == 'id|page':
+                        if isinstance(arg, int):
+                            key_suffix = str(arg)
+                            break
+                    else:
+                        if isinstance(arg, str) and re.match('.*@.*', arg):
+                            key_suffix = str(arg)
+                            break          
+                key = key_prefix+key_suffix
+                instance = cls()
+                redis_client = await instance.get_redis_client()
+                if result:
+                    return json.loads(result)
+                result = await function(*args, **kwargs)
+                await TaskManager.create_task(redis_client.delete(key))
                 return result
             return wrapper
         return inner_decorator 

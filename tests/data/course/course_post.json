@@ -1,0 +1,89 @@
+{
+    "endpoint": "course/create",
+    "valid": [
+        {
+            "category_id": 100,
+            "course_name": "Math and Geometry",
+            "cost": 2000,
+            "difficulty": "easy",
+            "private_info": "This is a private note."
+        },
+        {
+            "category_id": 101,
+            "course_name": "Physics Basics",
+            "cost": 1500,
+            "difficulty": "medium",
+            "private_info": null
+        },
+        {
+            "category_id": 102,
+            "course_name": "Advanced Programming",
+            "cost": 2500,
+            "difficulty": "hard",
+            "private_info": "Advanced course details."
+        },
+        {
+            "category_id": 103,
+            "course_name": "Introduction to Art",
+            "cost": 1000,
+            "difficulty": "easy",
+            "private_info": "Art course for beginners."
+        }
+    ],
+    "invalid": [
+        {
+            "error_code": 422,
+            "locs": ["course_name"],
+            "category_id": 100,
+            "course_name": "",
+            "cost": 2000,
+            "difficulty": "easy",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 422,
+            "locs": ["cost"],
+            "category_id": 100,
+            "course_name": "Physics Basics",
+            "cost": -500,
+            "difficulty": "medium",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 422,
+            "locs": ["difficulty"],
+            "category_id": 100,
+            "course_name": "Advanced Programming",
+            "cost": 2500,
+            "difficulty": "unknown",
+            "private_info": "Valid private info."
+        },
+        {
+            "error_code": 404,
+            "message": "Category with this id doesn't exist",
+            "category_id": 9999,
+            "course_name": "Introduction to Art",
+            "cost": 1000,
+            "difficulty": "easy",
+            "private_info": "Valid private info."
+
+        },
+        {
+            "error_code": 422,
+            "locs": ["cost", "difficulty"],
+            "category_id": 100,
+            "course_name": "History of Science",
+            "cost": 0,
+            "difficulty": "adsfadsf"
+        },
+        {
+            "error_code": 422,
+            "locs": ["private_info"],
+            "category_id": 100,
+            "course_name": "History of Science",
+            "cost": 1800,
+            "difficulty": "medium",
+            "private_info": "  "
+        }
+    ]
+}
