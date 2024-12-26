@@ -14,6 +14,7 @@ class Lesson(Base):
     
     lesson_id = Column(Integer, primary_key=True)
     course_id = Column(Integer, ForeignKey('course.course_id'), nullable=False)
+    lesson_name = Column(String, nullable=False)
     lesson_materials = Column(String, nullable=True)
 
     course = relationship("Course", back_populates="lesson")
@@ -31,17 +32,16 @@ class StudentLesson(Base):
     __tablename__ = 'student_lesson'
     
     student_lesson_id = Column(Integer, primary_key=True)
-    student_course_id = Column(Integer, ForeignKey('student_course.student_course_id'), nullable=False)
+    student_id = Column(Integer, ForeignKey('students.student_id'), nullable=False)
     lesson_id = Column(Integer, ForeignKey('lessons.lesson_id'), nullable=False)
     done = Column(Boolean, default=False)
     result = Column(Integer, nullable=True)
 
-    student_course = relationship("StudentCourse", back_populates="student_lesson")
     student_lesson_task = relationship("StudentLessonTask", back_populates="student_lesson")
 
     __table_args__ = (
         Index('idx_student_lesson_student_lesson_id', 'student_lesson_id'),
         Index('idx_student_lesson_lesson_id', 'lesson_id'),
-        Index('idx_student_lesson_student_course_id', 'student_course_id'),
+        Index('idx_student_lesson_student_id', 'student_id'),
     )
     primary_key = 'student_lesson_id'

@@ -71,7 +71,6 @@ class StudentCourse(Base):
     end_date = Column(DateTime, nullable=True)
 
     student = relationship('Student', back_populates='course') 
-    student_lesson = relationship('StudentLesson', back_populates='student_course') 
 
 
     __table_args__ = (
