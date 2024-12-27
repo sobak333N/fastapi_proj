@@ -18,6 +18,8 @@ from tests.utils import sign_in, sign_out
 async def test_post_course(test_data, request):
     async with AsyncClient(base_url="http://nginx/api/v1", cookies=Cookies()) as async_client:
 
+        logger.critical("END test_post_coursetest_post_course")
+
         credentials = request.getfixturevalue("credentials")
         post_course_data = request.getfixturevalue("post_course")
         endpoint = post_course_data["endpoint"]

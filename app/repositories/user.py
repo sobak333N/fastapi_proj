@@ -38,13 +38,12 @@ class RedisUser(RedisInstanced):
                 result = await redis_client.get(key)
                 if result:
                     user = json.loads(result)
-
                     instructor_data = user.pop("instructor", None)
                     if instructor_data:
                         user["instructor"] = Instructor(**instructor_data)
                     student_data = user.pop("student", None)
                     if student_data:
-                        user["student"] = Instructor(**student_data)
+                        user["student"] = Student(**student_data)
 
                     user = User(**user)
                     return user
@@ -65,7 +64,7 @@ class UserRepository(BaseRepository):
     def __init__(self):
         super().__init__(User)
 
-    @RedisUser.get_cache(key_prefix="current_user")
+    # @RedisUser.get_cache(key_prefix="current_user")
     async def get_user_by_email(self, email: str, session: AsyncSession):
         statement = select(User).where(User.email == email)
         result = await session.execute(statement)

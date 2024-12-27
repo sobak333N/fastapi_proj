@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
+    TEST_POSTGRES_DB: str
     POSTGRES_HOST: str
     POSTGRES_INNER_PORT: int
 
@@ -22,10 +23,15 @@ class Settings(BaseSettings):
     REDIS_HOST: str    
     REDIS_INNER_PORT: int
 
+    TESTING: str
+
     @property
     def DATABASE_URL(self) -> str:
         # postgresql+asyncpg://postgres:postgres@db/postgres
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.POSTGRES_DB}"
+        if self.TESTING != "FALSE": 
+            return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.TEST_POSTGRES_DB}"
+        else:
+            return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.POSTGRES_DB}"
 
     class Config:
         env_file = ".env"

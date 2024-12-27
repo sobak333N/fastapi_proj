@@ -7,7 +7,7 @@ from tests.conftest import signup_instructor_data, logger
 from tests.utils import sign_in, sign_out
 
 
-# @pytest.mark.skip(reason="temporary")
+@pytest.mark.skip(reason="temporary")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "test_data",

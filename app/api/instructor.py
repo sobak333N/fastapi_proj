@@ -20,6 +20,7 @@ async def get_course_by_id(
     reponse = ShortInstructorResponse(**jsonable_encoder(instructor)).model_dump()
     return reponse
 
+
 @instructor_router.patch("/patch/{instructor_id}", status_code=status.HTTP_200_OK, response_model=InstructorResponse)
 async def get_course_by_id(
     instructor_id: int,
