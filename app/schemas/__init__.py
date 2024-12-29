@@ -3,7 +3,11 @@ from .instructor import (
     InstructorResponse, ShortInstructorResponse,
     UpdateInstructorResponse,
 )
-from .student import StudentResponse, ShortStudentResponse
+from .student import (
+    StudentResponse, 
+    ShortStudentResponse,
+    UpdateStudentResponse,
+)
 from .category import ( 
     InputCategorySchema, 
     ShortResponseCategorySchema,

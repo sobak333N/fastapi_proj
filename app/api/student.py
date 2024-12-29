@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends, status, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import ShortStudentResponse
+from app.schemas import (
+    ShortStudentResponse, UpdateStudentResponse,
+    StudentResponse
+)
 from app.core.db import get_db
 from app.services import StudentService
 from app.models import User
@@ -39,3 +42,12 @@ async def get_student_by_id(
         payment_type=payment_type,
         session=session
     )
+    
+@student_router.patch("/patch", status_code=status.HTTP_200_OK, response_model=StudentResponse)
+async def patch_instructor(
+    student_model: UpdateStudentResponse,
+    session: AsyncSession=Depends(get_db),
+    user: User=Depends(get_current_user),
+    permission: bool=Depends(RoleChecker([Roles2.student]))
+):
+    return await student_service.patch_instance(student_model, user, session)
