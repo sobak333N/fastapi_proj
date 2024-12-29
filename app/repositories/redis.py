@@ -51,11 +51,12 @@ class RedisClass:
                     return json.loads(result)
 
                 result = await function(*args, **kwargs)
-                await redis_client.set(
-                    name=key, 
-                    value=json.dumps((jsonable_encoder(result))),
-                    ex=60*60*24
-                )
+                if result:
+                    await redis_client.set(
+                        name=key, 
+                        value=json.dumps((jsonable_encoder(result))),
+                        ex=60*60*24
+                    )
                 return result
             return wrapper
         return inner_decorator 
@@ -108,25 +109,18 @@ class RedisInstanced(RedisClass):
         self.db_num: int = db_num
 
     @classmethod
-    def del_cache(cls, key_prefix: str="example", key_type: str='id|page'):
+    def del_cache(cls, key_prefix: str="example"):
         def inner_decorator(function: Coroutine):
             @wraps(function)
             async def wrapper(*args, **kwargs):                
                 key_suffix: str = None
                 for arg in args:
-                    if key_type == 'id|page':
-                        if isinstance(arg, int):
-                            key_suffix = str(arg)
-                            break
-                    else:
-                        if isinstance(arg, str) and re.match('.*@.*', arg):
-                            key_suffix = str(arg)
-                            break          
+                    if isinstance(arg, str):
+                        key_suffix = str(arg)
+                        break        
                 key = key_prefix+key_suffix
                 instance = cls()
                 redis_client = await instance.get_redis_client()
-                if result:
-                    return json.loads(result)
                 result = await function(*args, **kwargs)
                 await TaskManager.create_task(redis_client.delete(key))
                 return result

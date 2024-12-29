@@ -1,5 +1,7 @@
-from typing import Type, TypeVar, List, Coroutine
+from typing import Type, TypeVar, List, Coroutine, Optional
 from functools import wraps
+from datetime import datetime
+from enum import Enum
 import json
 
 from fastapi import Depends, Request, status
@@ -7,16 +9,16 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, noload
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 
-from app.core.db import get_db
+
 from app.models import User, RefreshToken, Instructor, Student
 from app.models.user import Roles2
 from app.auth.schemas import UserCreateModel
 from app.auth.utils import generate_passwd_hash
 from app.repositories.base_repository import BaseRepository
 from app.repositories.redis import RedisInstanced
-
+from app.task_manager import TaskManager
 
 T = TypeVar('T')
 
@@ -31,7 +33,6 @@ class RedisUser(RedisInstanced):
                 for arg in args:
                     if isinstance(arg, str):
                         key_suffix = str(arg)
-                        break    
                 key = key_prefix+key_suffix
                 instance = cls()
                 redis_client = await instance.get_redis_client()
@@ -45,15 +46,38 @@ class RedisUser(RedisInstanced):
                     if student_data:
                         user["student"] = Student(**student_data)
 
+                    user['birthdate'] = datetime.strptime(user['birthdate'], "%Y-%m-%dT%H:%M:%S")
+                    user['created_at'] = datetime.strptime(user['created_at'], "%Y-%m-%dT%H:%M:%S.%f")
                     user = User(**user)
                     return user
 
                 result = await function(*args, **kwargs)
-                await redis_client.set(
-                    name=key, 
-                    value=json.dumps((jsonable_encoder(result))),
-                    ex=60*60*24
-                )
+                if result:
+                    await redis_client.set(
+                        name=key, 
+                        value=json.dumps((jsonable_encoder(result))),
+                        ex=60*60*24
+                    )
+                return result
+            return wrapper
+        return inner_decorator 
+
+
+    @classmethod
+    def del_cache(cls, key_prefix: str="example"):
+        def inner_decorator(function: Coroutine):
+            @wraps(function)
+            async def wrapper(*args, **kwargs):                
+                key_suffix: str = None
+                for arg in args:
+                    if isinstance(arg, User):
+                        key_suffix = str(arg.email)
+                        break        
+                key = key_prefix+key_suffix
+                instance = cls()
+                redis_client = await instance.get_redis_client()
+                result = await function(*args, **kwargs)
+                await TaskManager.create_task(redis_client.delete(key))
                 return result
             return wrapper
         return inner_decorator 
@@ -64,7 +88,7 @@ class UserRepository(BaseRepository):
     def __init__(self):
         super().__init__(User)
 
-    # @RedisUser.get_cache(key_prefix="current_user")
+    @RedisUser.get_cache(key_prefix="current_user")
     async def get_user_by_email(self, email: str, session: AsyncSession):
         statement = select(User).where(User.email == email)
         result = await session.execute(statement)
@@ -120,9 +144,24 @@ class UserRepository(BaseRepository):
         return result
 
 
+
+
 class BaseUserRepository(BaseRepository):
     async def get_by_user_id(self, user_id: int, session: AsyncSession) -> T:
         statement = select(self.model).where(self.model.user_id == user_id)
         result = await session.execute(statement)
         instance = result.scalars().first()
         return instance
+    
+    # async def update_instance(self, instance: T, session: AsyncSession, **kwargs) -> Optional[T]:
+    #     # if kwargs:
+    #         # for attr, value in kwargs.items():
+    #             # setattr(instance, attr, value)
+    #     for attr, value in instance.__dict__.items():
+    #         setattr(instance, attr, value)
+    #     session.add(instance)
+    #     print("BEFORE COMMIT2")
+    #     print(session.__dict__)
+    #     await session.commit()
+    #     print("AFTER COMMIT2")
+    #     return instance

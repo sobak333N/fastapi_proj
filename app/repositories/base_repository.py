@@ -3,8 +3,11 @@ from typing import Type, TypeVar, Any, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.future import select
-from sqlalchemy import update, func
+from sqlalchemy import update, func, inspect
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.orm.collections import InstrumentedList
 
+from app.core.db import get_db, Base
 from app.config import Config
 
 
@@ -58,13 +61,21 @@ class BaseRepository:
         result = await session.execute(statement)
         return result.scalar()
 
-    async def create_instance(self, session: AsyncSession, **kwargs) -> Optional[T]:
+    async def create_instance(self, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
         new_instance = self.model(**kwargs)
         session.add(new_instance)
-        await session.commit()
+        if not no_commit:
+            await session.commit()
         return new_instance
 
-    async def set_value(self, instance: T, attr: str, value: Any, session: AsyncSession) -> Optional[T]:
+    async def set_value(
+        self, 
+        instance: T, 
+        attr: str, 
+        value: Any, 
+        session: AsyncSession, 
+        no_commit: bool=False
+    ) -> Optional[T]:
         if hasattr(instance, attr):
             instance_pk = getattr(instance, self.primary_key)
             statement = (
@@ -75,18 +86,43 @@ class BaseRepository:
                 .returning(self.model)
             )
             result = await session.execute(statement)
-            await session.commit()
+            if not no_commit:
+                await session.commit()
             updated_instance = result.scalar_one_or_none()
             return updated_instance
         return None
     
-    async def update_instance(self, instance: T, session: AsyncSession, **kwargs) -> Optional[T]:
+    async def update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
         for attr, value in kwargs.items():
             setattr(instance, attr, value)
-        session.add(instance)
-        await session.commit()
+        if not no_commit:
+            await session.commit()
         return instance
 
-    async def delete_instance(self, instance: T , session: AsyncSession) -> None:
+
+    async def raw_update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
+        values = {
+            key: value
+            for key, value in instance.__dict__.items()
+            if not key.startswith('_') and 
+            not isinstance(value, (InstrumentedList, InstrumentedAttribute, Base))
+        }
+        instance_pk = getattr(instance, self.primary_key)
+        stmt = (
+            update(self.model)
+            .where(self.model_pk == instance_pk)
+            .values(**(values))
+            .execution_options(synchronize_session="fetch")
+            .returning(self.model)
+        )
+        result = await session.execute(stmt)
+        if not no_commit:
+            await session.commit()
+        updated_instance = result.scalar_one_or_none()
+        return updated_instance
+
+
+    async def delete_instance(self, instance: T , session: AsyncSession, no_commit: bool=False) -> None:
         await session.delete(instance)
-        await session.commit()
+        if not no_commit:
+            await session.commit()

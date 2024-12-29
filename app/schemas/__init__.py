@@ -1,5 +1,8 @@
 from .user import UserResponse
-from .instructor import InstructorResponse, ShortInstructorResponse
+from .instructor import (
+    InstructorResponse, ShortInstructorResponse,
+    UpdateInstructorResponse,
+)
 from .student import StudentResponse, ShortStudentResponse
 from .category import ( 
     InputCategorySchema, 

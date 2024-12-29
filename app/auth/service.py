@@ -32,7 +32,6 @@ class AuthService:
 
 
     def generate_differents_profile(self, user: User):
-        print(user.__dict__)
         if user.role == Roles2.student or user.role == Roles2.student.value:
             for attr, value in user.student.__dict__.items():
                 if not attr.startswith('_'):

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from pydantic import Field
 from app.schemas.user import UserResponse
@@ -29,4 +29,38 @@ class ShortInstructorResponse(InstructorResponse):
         fields = {
             'email': 'exclude',
             'user_id': 'exclude',
+        }
+
+
+class UpdateInstructorResponse(ShortInstructorResponse):
+
+    instructor_id: Optional[Any] = Field(default=None, exclude=True) 
+    created_at: Optional[Any] = Field(default=None, exclude=True)
+    role: Optional[Any] = Field(default=None, exclude=True) 
+
+    model_config = {
+            "from_attributes": True,
+            "orm_mode": True,
+            "extra": "ignore",
+            "fields": {
+                'email': {"exclude": True},
+                'user_id': {"exclude": True},
+                "instructor_id": {"exclude": True},
+                "created_at": {"exclude": True},
+                "role": {"exclude": True},
+            },
+            "json_schema_extra": {
+                "examples": [
+                    {
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "second_name": "Smith",
+                        "birthdate": "2024-12-27",
+                        "education": "MSc in Computer Science",
+                        "academic_degree": "master",
+                        "academical_experience": 5,
+                        "H_index": 10,
+                    }
+                ]
+            },
         }

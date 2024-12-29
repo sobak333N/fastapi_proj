@@ -24,9 +24,9 @@ async def test_get_by_id_course(test_data, request):
         # endpoint = post_course_data["endpoint"]
 
 
-        res = await session.execute(text("SELECT * FROM users"))
-        res = res.scalars().all()
-        logger.critical(f"{res=}")
+        # res = await session.execute(text("SELECT * FROM users"))
+        # res = res.scalars().all()
+        # logger.critical(f"{res=}")
 
 
         student_valid_payload = credentials["valid"]["student3"]
