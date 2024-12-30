@@ -49,6 +49,7 @@ async def shutdown():
 
 @app.on_event("startup")
 async def startup():
+    ...
     # await TaskManager.wait_for_end()
 
 app.include_router(auth_router, prefix=f"{version_prefix}/auth", tags=["auth"])

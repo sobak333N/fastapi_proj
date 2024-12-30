@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from pydantic import validator
 
 
 class Settings(BaseSettings):
@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     MONGO_HOST: str
     MONGO_INNER_PORT: int
 
+    S3_URL: str
+    S3_BUCKET: str
+    S3_ACCESS_KEY: str
+    S3_SECRET_ACCESS_KEY: str
+    REGION: str
+    MAX_FILE_SIZE: int
+    
     REDIS_URL: str = "redis://localhost:6379/0"
     REDIS_HOST: str    
     REDIS_INNER_PORT: int
@@ -43,6 +50,12 @@ class Settings(BaseSettings):
     def MONGO_DB_URL(self) -> str:
         return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_INNER_PORT}/{self.MONGO_DB}?authSource=admin"
 
+    @validator("MAX_FILE_SIZE", pre=True)
+    def parse_max_file_size(cls, value: str) -> int:
+        if value.endswith("MB"):
+            return int(value[:-2]) * 1024 * 1024 
+        raise Exception(message="NOT CORRECT MAX_FILE_SIZE")
+    
     class Config:
         env_file = ".env"
         extra = "ignore"

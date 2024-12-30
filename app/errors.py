@@ -53,6 +53,9 @@ class InstanceDoesntExists(CourcesException):
     def __init__(self, message: str = "xui with this id doesn't exist"):
         super().__init__(message=message)
 
+class FileIsTooLarge(CourcesException):
+    """User does not have the necessary permissions to perform an action."""
+    pass
 
 def create_exception_handler(
     status_code: int, initial_detail: Any
@@ -157,6 +160,17 @@ def register_all_errors(app: FastAPI):
                 "message": "Instance with this id doesn't exist",
                 "resolution": "Please check the entity identifier and try again",
                 "error_code": "not_found",
+            },
+        ),
+    )
+    app.add_exception_handler(
+        FileIsTooLarge,
+        create_exception_handler(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            initial_detail={
+                "message": "File is too large",
+                "resolution": "Try to upload another file with smaller size",
+                "error_code": "large_file",
             },
         ),
     )

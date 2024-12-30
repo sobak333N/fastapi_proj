@@ -71,7 +71,6 @@ services:
       - db
       - redis
     networks:
-      # - test-network
       - app-network
     logging:
       driver: "none"  # Отключает сбор логов
@@ -105,7 +104,5 @@ volumes:
   db_data:
 
 networks:
-  test-network:
-    driver: bridge
   app-network:
     driver: bridge

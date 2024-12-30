@@ -21,4 +21,6 @@ from .course import (
     CoursePagedResponseSchema,
     PrivateResponseCourseSchema,
 )
-from .other import PagedResponseSchema
+from .other import (
+    PagedResponseSchema, S3LinkResponse
+)

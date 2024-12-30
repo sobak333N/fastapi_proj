@@ -1,18 +1,21 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import (
+    APIRouter, Depends, 
+    status, Query,
+    UploadFile, File,
+)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas import (
     ShortInstructorResponse, InstructorResponse,
-    UpdateInstructorResponse,
+    UpdateInstructorResponse, S3LinkResponse,
 )
 from app.core.db import get_db
-from app.services import InstructorService
+from app.services import InstructorService, S3Client
 from app.models import User
 from app.models.user import Roles2
 from app.auth.dependencies import get_current_user, RoleChecker
-
-
+from app.base_responses import BaseSuccessResponse
 
 
 instructor_router = APIRouter()
@@ -41,3 +44,12 @@ async def patch_instructor(
     # instructor = await instructor_service.get_instance_by_pk(instructor_id, session)
     # reponse = ShortInstructorResponse(**jsonable_encoder(instructor)).model_dump()
     # return reponse
+    
+@instructor_router.post("/upload-file", status_code=status.HTTP_200_OK, response_model=S3LinkResponse)
+async def upload_file(
+    permission: bool=Depends(RoleChecker([Roles2.instructor])),
+    file: UploadFile=File(...)
+):
+    s3_client = S3Client()
+    file_link = await s3_client.upload_file(file)
+    return S3LinkResponse(link=file_link)
