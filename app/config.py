@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_INNER_PORT: int
 
+    MONGO_USER: str
+    MONGO_PASSWORD: str
+    MONGO_DB: str
+    MONGO_HOST: str
+    MONGO_INNER_PORT: int
+
     REDIS_URL: str = "redis://localhost:6379/0"
     REDIS_HOST: str    
     REDIS_INNER_PORT: int
@@ -32,6 +38,10 @@ class Settings(BaseSettings):
             return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.TEST_POSTGRES_DB}"
         else:
             return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.POSTGRES_DB}"
+
+    @property
+    def MONGO_DB_URL(self) -> str:
+        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_INNER_PORT}/{self.MONGO_DB}?authSource=admin"
 
     class Config:
         env_file = ".env"

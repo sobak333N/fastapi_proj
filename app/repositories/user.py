@@ -48,6 +48,7 @@ class RedisUser(RedisInstanced):
 
                     user['birthdate'] = datetime.strptime(user['birthdate'], "%Y-%m-%dT%H:%M:%S")
                     user['created_at'] = datetime.strptime(user['created_at'], "%Y-%m-%dT%H:%M:%S.%f")
+                    user['role'] = Roles2[user.get("role")]
                     user = User(**user)
                     return user
 

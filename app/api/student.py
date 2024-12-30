@@ -38,6 +38,7 @@ async def get_student_by_id(
 ):
     return await student_service.buy_course(
         course_id=course_id, 
+        user=user,
         student_id=user.student.student_id, 
         payment_type=payment_type,
         session=session

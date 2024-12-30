@@ -1,12 +1,66 @@
+
 # models/lesson.py
+from typing import List, Union
+from enum import Enum as PyEnum
+
+from pydantic import BaseModel, Field
 from sqlalchemy import (
     Column, Integer, 
     String, Boolean, 
     ForeignKey, Index,
 )
 from sqlalchemy.orm import relationship
-from enum import Enum as PyEnum
+from beanie import Document
+
 from app.core.db import Base
+
+
+class MaterialType(PyEnum):
+    text = "text"
+    image = "image"
+    video = "video"
+    formula = "formula"
+    lesson_task = "task"
+
+
+class BaseMaterial(BaseModel):
+    type: MaterialType = Field(..., description="Тип материала") 
+
+
+class TextMaterial(BaseMaterial):
+    type: MaterialType = MaterialType.text
+    data: str = Field(..., description="Текст материала")
+
+
+class ImageMaterial(BaseMaterial):
+    type: MaterialType = MaterialType.image
+    data: str = Field(..., description="Ссылка на изображение")
+
+
+class VideoMaterial(BaseMaterial):
+    type: MaterialType = MaterialType.video
+    data: str = Field(..., description="Ссылка на видео")
+
+
+class FormulaMaterial(BaseMaterial):
+    type: MaterialType = MaterialType.formula
+    data: str = Field(..., description="Формула в LaTeX формате")
+
+
+class TaskMaterial(BaseMaterial):
+    type: MaterialType = MaterialType.lesson_task
+    lesson_task_id: int = Field(..., description="ID задачи из MongoDB или SQL")
+
+
+class LessonDocument(Document):
+    lesson_id: int
+    lesson_name: str
+    materials: List[
+        Union[TextMaterial, ImageMaterial, VideoMaterial, FormulaMaterial, TaskMaterial]
+    ] = Field(
+        default=[],
+        description="Материалы урока"
+    )
 
 
 class Lesson(Base):
@@ -26,6 +80,10 @@ class Lesson(Base):
     )
     primary_key = 'lesson_id'
 
+
+class LessonDocument(Document):
+    lesson_id: int
+    materials: List
 
 
 class StudentLesson(Base):

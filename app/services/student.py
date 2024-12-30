@@ -30,13 +30,17 @@ class StudentService(BaseService):
     async def buy_course(
         self, 
         course_id: int, 
+        user: User,
         student_id: int, 
         payment_type: PaymentType,
         session: AsyncSession,
     ) -> BaseSuccessResponse:
 
         # checking existing of course
-        await self.course_service.get_instance_by_pk(pk=course_id, session=session)
+        await self.course_service.instance_exists(
+            pk=course_id, 
+            session=session
+        )
         
         # background task with sending request to external financial service
         # asyncio.create_task()

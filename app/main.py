@@ -47,6 +47,9 @@ register_all_errors(app)
 async def shutdown():
     await TaskManager.wait_for_end()
 
+@app.on_event("startup")
+async def startup():
+    # await TaskManager.wait_for_end()
 
 app.include_router(auth_router, prefix=f"{version_prefix}/auth", tags=["auth"])
 app.include_router(category_router, prefix=f"{version_prefix}/category", tags=["category"])

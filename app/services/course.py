@@ -47,10 +47,14 @@ class CourseService(BaseService):
         session: AsyncSession,
     ) -> List[Course]:
         return await self.repository.get_all_instance(page, category_ids, start_cost, end_cost, session)
-    
+
+    async def instance_exists(self, pk: int, session: AsyncSession) -> bool:
+        return bool(await super().get_instance_by_pk(pk, session))
+
     async def get_instance_by_pk(self, pk: int, user: User, session: AsyncSession):
         course = await super().get_instance_by_pk(pk, session)
         access = await self.check_access_to_course(course, user, session)
+        print(access)
         if not access:
             print("NO ACCESS")
             delattr(course, 'private_info')

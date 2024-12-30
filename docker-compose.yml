@@ -89,6 +89,17 @@ services:
       fi
       "
 
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    ports:
+      - ${MONGO_OUTER_PORT}:${MONGO_INNER_PORT}
+    networks:
+      - app-network
 
 volumes:
   db_data:
