@@ -9,7 +9,7 @@ from app.api import (
 )
 from .errors import register_all_errors
 from .task_manager import TaskManager
-from app.core.db import init_mongo_db
+from app.core.mongo_db import init_mongo_db
 # from .middleware import register_middleware
 
 
@@ -32,9 +32,9 @@ app = FastAPI(
     version=version,
     license_info={"name": "MIT License", "url": "https://opensource.org/license/mit"},
     contact={
-        "name": "Ssali Jonathan",
-        "url": "https://github.com/jod35",
-        "email": "ssalijonathank@gmail.com",
+        "name": "Ryazanskii Vyacheslav",
+        "url": "https://github.com/sobak333N",
+        "email": "p.ko1@yandex.com",
     },
     terms_of_service="httpS://example.com/tos",
     openapi_url=f"{version_prefix}/openapi.json",

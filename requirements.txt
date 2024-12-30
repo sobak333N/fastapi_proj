@@ -1,10 +1,9 @@
-fastapi==0.111.0
+fastapi==0.115.6
 fastapi-cli==0.0.5
 fastapi-mail==1.4.1
-pydantic==2.8.2
-pydantic-settings==2.4.0
-pydantic_core==2.20.1
-uvicorn==0.22.0
+pydantic==2.10.3
+pydantic-settings==2.6.1
+uvicorn==0.32.1
 gunicorn==20.1.0
 sqlalchemy==2.0.11
 psycopg2-binary==2.9.6
@@ -19,8 +18,5 @@ pytest==7.4.4
 pytest-asyncio==0.21.1
 passlib==1.7.4
 
-motor==3.1.1 
-# beanie==1.17.0
-beanie==1.18.0
-pymongo==4.4.1
-# pymongo==4.4.1
+beanie==1.28.0
+

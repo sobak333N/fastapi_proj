@@ -4,3 +4,5 @@ from .instructor import InstructorRepository
 from .category import CategoryRepository
 from .course import CourseRepository
 from .redis import RedisPaged, RedisInstanced
+from .lesson import LessonRepository
+from .lesson_task import LessonTaskRepository   
