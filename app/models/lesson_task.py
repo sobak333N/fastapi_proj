@@ -1,3 +1,7 @@
+from enum import Enum as PyEnum
+from typing import Union, List
+
+from pydantic import BaseModel, Field
 from sqlalchemy import (
     Column, Integer, 
     String, Enum, 
@@ -5,24 +9,32 @@ from sqlalchemy import (
     Index,
 )
 from sqlalchemy.orm import relationship
-from enum import Enum as PyEnum
+from beanie import Document
+
 from app.core.db import Base
 
 
 class TaskTypeEnum(PyEnum):
-    TEST = "Test"
-    ASSIGNMENT = "Assignment"
+    test = "Test"
+    assignment = "Assignment"
 
+
+class LessonTaskDocument(Document):
+    lesson_task_id: int = Field(..., description="lesson_task_id")
+    lesson_id: int = Field(..., description="lesson_id")
+    question: str = Field(..., description="question")
+    task_type: TaskTypeEnum = Field(..., description="task_type")
+    options: List[int] = Field(default=[])
+    answer: str = Field(..., description="answer")
+
+    class Settings:
+        name = "lesson_task"
 
 class LessonTask(Base):
     __tablename__ = 'lesson_tasks'
     
     lesson_task_id = Column(Integer, primary_key=True)
     lesson_id = Column(Integer, ForeignKey('lessons.lesson_id'), nullable=False)
-    question = Column(String, nullable=False)
-    task_type = Column(Enum(TaskTypeEnum), nullable=False)
-    answers = Column(String, nullable=True)  # Could be JSON or a serialized list of answers
-    answer = Column(String, nullable=False)
 
     lesson = relationship("Lesson", back_populates="lesson_task")
 

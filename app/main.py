@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from app.auth.routes import auth_router
 from app.api import (
     category_router,
@@ -8,6 +9,7 @@ from app.api import (
 )
 from .errors import register_all_errors
 from .task_manager import TaskManager
+from app.core.db import init_mongo_db
 # from .middleware import register_middleware
 
 
@@ -49,7 +51,7 @@ async def shutdown():
 
 @app.on_event("startup")
 async def startup():
-    # await TaskManager.wait_for_end()
+    await init_mongo_db()
 
 app.include_router(auth_router, prefix=f"{version_prefix}/auth", tags=["auth"])
 app.include_router(category_router, prefix=f"{version_prefix}/category", tags=["category"])

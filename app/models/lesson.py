@@ -49,7 +49,7 @@ class FormulaMaterial(BaseMaterial):
 
 class TaskMaterial(BaseMaterial):
     type: MaterialType = MaterialType.lesson_task
-    lesson_task_id: int = Field(..., description="ID задачи из MongoDB или SQL")
+    lesson_task_id: int = Field(..., description="ID задачи из MongoDB")
 
 
 class LessonDocument(Document):
@@ -61,6 +61,9 @@ class LessonDocument(Document):
         default=[],
         description="Материалы урока"
     )
+    
+    class Settings:
+        name = "lesson"
 
 
 class Lesson(Base):
@@ -68,8 +71,6 @@ class Lesson(Base):
     
     lesson_id = Column(Integer, primary_key=True)
     course_id = Column(Integer, ForeignKey('course.course_id'), nullable=False)
-    lesson_name = Column(String, nullable=False)
-    lesson_materials = Column(String, nullable=True)
 
     course = relationship("Course", back_populates="lesson")
     lesson_task = relationship("LessonTask", back_populates="lesson")
@@ -80,10 +81,6 @@ class Lesson(Base):
     )
     primary_key = 'lesson_id'
 
-
-class LessonDocument(Document):
-    lesson_id: int
-    materials: List
 
 
 class StudentLesson(Base):
