@@ -1,4 +1,7 @@
-from typing import Type, TypeVar, Any, Optional, List
+from typing import (
+    Type, TypeVar, Any, 
+    Optional, List, Generic,
+)
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import class_mapper
@@ -12,8 +15,10 @@ from app.config import Config
 
 
 T = TypeVar('T')
+D = TypeVar('D')
 
-class BaseRepository:
+
+class BaseRepository(Generic[T]):
     def __init__(self, model: Type[T]):
         self.model = model
         mapper = class_mapper(self.model)
@@ -126,3 +131,9 @@ class BaseRepository:
         await session.delete(instance)
         if not no_commit:
             await session.commit()
+
+
+class DocumentRepository(Generic[T, D], BaseRepository[T]):
+    def __init__(self, model: Type[T], document_model: Type[D]):
+        super().__init__(model)
+        self.document_model = document_model

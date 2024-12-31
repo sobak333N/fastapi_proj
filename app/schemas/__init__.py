@@ -21,4 +21,8 @@ from .course import (
     CoursePagedResponseSchema,
     PrivateResponseCourseSchema,
 )
+from .lesson import (
+    LessonSchema,
+    InputLessonSchema,
+)
 from .other import PagedResponseSchema

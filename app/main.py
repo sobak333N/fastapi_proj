@@ -6,6 +6,7 @@ from app.api import (
     course_router,
     instructor_router,
     student_router,
+    lesson_router,
 )
 from .errors import register_all_errors
 from .task_manager import TaskManager
@@ -58,5 +59,4 @@ app.include_router(category_router, prefix=f"{version_prefix}/category", tags=["
 app.include_router(course_router, prefix=f"{version_prefix}/course", tags=["course"])
 app.include_router(instructor_router, prefix=f"{version_prefix}/instructor", tags=["instructor"])
 app.include_router(student_router, prefix=f"{version_prefix}/student", tags=["student"])
-
-
+app.include_router(lesson_router, prefix=f"{version_prefix}/lesson", tags=["lesson"])
