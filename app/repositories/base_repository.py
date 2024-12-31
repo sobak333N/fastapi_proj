@@ -61,12 +61,12 @@ class BaseRepository(Generic[T]):
         result = await session.execute(statement)
         return result.scalars().all()
 
-    async def get_total_count(self, session: AsyncSession) -> List[T]:
+    async def get_total_count(self, session: AsyncSession) -> int:
         statement = select(func.count()).select_from(self.model)
         result = await session.execute(statement)
         return result.scalar()
 
-    async def create_instance(self, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
+    async def create_instance(self, session: AsyncSession, no_commit: bool=False, **kwargs) -> T:
         new_instance = self.model(**kwargs)
         session.add(new_instance)
         if not no_commit:
@@ -97,7 +97,7 @@ class BaseRepository(Generic[T]):
             return updated_instance
         return None
     
-    async def update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
+    async def update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> T:
         for attr, value in kwargs.items():
             setattr(instance, attr, value)
         if not no_commit:

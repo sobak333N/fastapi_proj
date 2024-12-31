@@ -9,7 +9,7 @@ from app.models.course import PaymentStatus
 from app.config import Config
 
 
-class CourseRepository(BaseRepository):
+class CourseRepository(BaseRepository[Course]):
     def __init__(self):
         super().__init__(Course)
     

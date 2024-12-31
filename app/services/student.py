@@ -13,7 +13,7 @@ from app.base_responses import BaseSuccessResponse
 from app.services import CourseService
 
 
-class StudentService(BaseService):
+class StudentService(BaseService[Student]):
     def __init__(self):
         super().__init__(StudentRepository, "Student")
         self.course_service = CourseService()

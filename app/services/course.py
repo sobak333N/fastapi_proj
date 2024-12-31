@@ -13,7 +13,7 @@ from app.errors import InsufficientPermission
 from app.base_responses import BaseSuccessResponse
 
 
-class CourseService(BaseService):
+class CourseService(BaseService[Course]):
     def __init__(self):
         self.category_service = CategoryService()
         super().__init__(CourseRepository, "Course")

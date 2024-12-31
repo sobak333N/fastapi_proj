@@ -6,7 +6,7 @@ from app.repositories.user import BaseUserRepository
 from app.models import Student, StudentCourse
 
 
-class StudentRepository(BaseUserRepository):
+class StudentRepository(BaseUserRepository[Student]):
     def __init__(self):
         super().__init__(Student)
 

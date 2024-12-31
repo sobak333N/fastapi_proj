@@ -1,7 +1,7 @@
-from app.models import LessonTask
-from app.repositories.base_repository import BaseRepository
+from app.models import LessonTask, LessonTaskDocument
+from app.repositories.base_repository import DocumentRepository
 
 
-class LessonTaskRepository(BaseRepository):
+class LessonTaskRepository(DocumentRepository[LessonTask, LessonTaskDocument]):
     def __init__(self):
-        super().__init__(LessonTask)
+        super().__init__(LessonTask, LessonTaskDocument)

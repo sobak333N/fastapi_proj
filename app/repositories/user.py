@@ -85,12 +85,12 @@ class RedisUser(RedisInstanced):
 
 
 
-class UserRepository(BaseRepository):
+class UserRepository(BaseRepository[User]):
     def __init__(self):
         super().__init__(User)
 
     @RedisUser.get_cache(key_prefix="current_user")
-    async def get_user_by_email(self, email: str, session: AsyncSession):
+    async def get_user_by_email(self, email: str, session: AsyncSession) -> User:
         statement = select(User).where(User.email == email)
         result = await session.execute(statement)
         user = result.scalars().first()
@@ -106,7 +106,7 @@ class UserRepository(BaseRepository):
         return user
 
 
-    async def user_exists(self, email, session: AsyncSession):
+    async def user_exists(self, email, session: AsyncSession) -> bool:
         user = await self.get_user_by_email(email, session)
         return True if user is not None else False
 
@@ -147,7 +147,7 @@ class UserRepository(BaseRepository):
 
 
 
-class BaseUserRepository(BaseRepository):
+class BaseUserRepository(BaseRepository[T]):
     async def get_by_user_id(self, user_id: int, session: AsyncSession) -> T:
         statement = select(self.model).where(self.model.user_id == user_id)
         result = await session.execute(statement)
