@@ -1,7 +1,8 @@
 from typing import Optional, List
 import copy
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+from pydantic_core import PydanticCustomError
 
 from app.models.lesson_task import TaskTypeEnum
 
@@ -38,6 +39,21 @@ class InputLessonTaskSchema(BaseModel):
     answer: str = Field(..., description="answer")
     
     model_config = InputLessonTaskSchema_model_config
+    
+    @model_validator(mode="after")
+    def validate_options_depends_on_task_type(cls, values):
+        task_type = values.task_type
+        options = values.options
+        answer = values.answer
+        
+        if task_type == TaskTypeEnum.assignment and options is not None:
+            raise PydanticCustomError(
+                "value_error.options",
+                "options must be none", 
+                {"input": options, "expected": f"must be none with {TaskTypeEnum.assignment}"}
+            )
+        elif task_type == TaskTypeEnum.test and options is None:
+            ...
 
 
 class LessonTaskSchema(InputLessonTaskSchema):

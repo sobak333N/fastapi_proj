@@ -97,7 +97,9 @@ class BaseRepository(Generic[T]):
             return updated_instance
         return None
     
-    async def update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> T:
+    async def update_instance(
+        self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs
+    ) -> T:
         for attr, value in kwargs.items():
             setattr(instance, attr, value)
         if not no_commit:
@@ -105,7 +107,9 @@ class BaseRepository(Generic[T]):
         return instance
 
 
-    async def raw_update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
+    async def raw_update_instance(
+        self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs
+    ) -> Optional[T]:
         values = {
             key: value
             for key, value in instance.__dict__.items()
@@ -127,7 +131,9 @@ class BaseRepository(Generic[T]):
         return updated_instance
 
 
-    async def delete_instance(self, instance: T , session: AsyncSession, no_commit: bool=False) -> None:
+    async def delete_instance(
+        self, instance: T , session: AsyncSession, no_commit: bool=False
+    ) -> None:
         await session.delete(instance)
         if not no_commit:
             await session.commit()

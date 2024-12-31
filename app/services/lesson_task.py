@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
 from app.services.base_service import BaseService
 from app.repositories import LessonTaskRepository
@@ -21,6 +22,7 @@ class LessonTaskService(BaseService[LessonTask]):
             instance_pydatinc_model.lesson_id, session
         )
         await self.course_service.handling_valid_instructor(
-            lesson.course_id,  
+            lesson.course_id, user, session
         )
-        ...
+        jsonable_encoded_data = jsonable_encoder(instance_pydatinc_model)
+        return await self.repository.create_instance(session, **jsonable_encoded_data)
