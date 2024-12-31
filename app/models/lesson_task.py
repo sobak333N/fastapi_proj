@@ -1,5 +1,5 @@
 from enum import Enum as PyEnum
-from typing import Union, List
+from typing import Union, List, Optional
 
 from pydantic import BaseModel, Field
 from sqlalchemy import (
@@ -24,7 +24,7 @@ class LessonTaskDocument(Document):
     lesson_id: int = Field(..., description="lesson_id")
     question: str = Field(..., description="question")
     task_type: TaskTypeEnum = Field(..., description="task_type")
-    options: List[int] = Field(default=[])
+    options: Optional[List[str]] = Field(default=None)
     answer: str = Field(..., description="answer")
 
     class Settings:
