@@ -25,4 +25,8 @@ from .lesson import (
     LessonSchema,
     InputLessonSchema,
 )
+from .lesson_task import (
+    LessonTaskSchema,
+    InputLessonTaskSchema,
+)
 from .other import PagedResponseSchema

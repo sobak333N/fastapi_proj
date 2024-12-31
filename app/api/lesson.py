@@ -16,8 +16,6 @@ from app.auth.dependencies import (
 from app.services import LessonService
 
 
-
-
 lesson_router = APIRouter()
 lesson_service = LessonService()
 
@@ -30,4 +28,5 @@ async def create_lesson(
     permission: bool=Depends(RoleChecker([Roles2.instructor])),
 ):
     return await lesson_service.create_instance(user, lesson_model, session)
-    ...
+
+    

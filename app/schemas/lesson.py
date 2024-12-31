@@ -1,4 +1,6 @@
 from typing import Union, List
+import copy
+
 from pydantic import BaseModel, Field
 
 from app.models.lesson import (
@@ -25,7 +27,7 @@ InputLessonSchema_model_config = {
     },
 }
 
-LessonSchema_model_config = InputLessonSchema_model_config
+LessonSchema_model_config = copy.deepcopy(InputLessonSchema_model_config)
 LessonSchema_model_config["json_schema_extra"]["examples"][0]["lesson_id"] = 1
 
 
