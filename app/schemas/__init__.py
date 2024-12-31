@@ -24,6 +24,7 @@ from .course import (
 from .lesson import (
     LessonSchema,
     InputLessonSchema,
+    UpdateLessonSchema,
 )
 from .lesson_task import (
     LessonTaskSchema,

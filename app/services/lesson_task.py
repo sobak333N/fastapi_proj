@@ -14,7 +14,6 @@ class LessonTaskService(BaseService[LessonTask]):
         self.lesson_service = LessonService()
         self.course_service = CourseService()
         
-        
     async def create_instance(
         self, user: User, instance_pydatinc_model: InputLessonTaskSchema, session: AsyncSession
     ) -> LessonTaskSchema:

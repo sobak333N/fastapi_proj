@@ -46,6 +46,9 @@ class InsufficientPermission(CourcesException):
     """User does not have the necessary permissions to perform an action."""
     pass
 
+class NotCorrectLessonTasks(CourcesException):
+    """Not correct list of tasks of this lesson"""
+    pass
 
 class InstanceDoesntExists(CourcesException):
     """Instance doesn't exist error."""
@@ -159,4 +162,15 @@ def register_all_errors(app: FastAPI):
                 "error_code": "not_found",
             },
         ),
+    )
+    app.add_exception_handler(
+        NotCorrectLessonTasks,
+        create_exception_handler(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            initial_detail={
+                "message": "Not correct list of lesson tasks",
+                "resolution": "Please check list of lesson task in materials and try again",
+                "error_code": "not_correct_lesson_tasks",
+            },
+        )
     )
