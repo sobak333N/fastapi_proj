@@ -24,8 +24,6 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
                 course = {attr: value}
         
         kwargs.pop("course_id")
-        
-        
         lesson_relation = await super().create_instance(session=session, **course)
         lesson_document = self.document_model(
             lesson_id=lesson_relation.lesson_id,
@@ -52,7 +50,11 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
 
         lesson_document = await self.document_model.find_one(
             self.document_model.lesson_id == instance.lesson_id
-        ).set(**kwargs)
+        )
+        for attr, value in kwargs.items():
+            if attr in lesson_document.__dict__.keys(): 
+                setattr(lesson_document, attr, value)
+        await lesson_document.save()
         lesson_schema_dict = {
             **jsonable_encoder(lesson_relation),
             **jsonable_encoder(lesson_document)

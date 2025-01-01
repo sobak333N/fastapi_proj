@@ -34,7 +34,7 @@ UpdateLessonSchema_model_config["json_schema_extra"]["examples"][0]["materials"]
     {"type": "formula", "data": "formula_in_LATEX_format"},
     {"type": "task", "lesson_task_id": 32},
 ]
-
+UpdateLessonSchema_model_config["json_schema_extra"]["examples"][0].pop('lesson_id')
 
 class InputLessonSchema(BaseModel):
     course_id: int = Field(..., description="course_id")

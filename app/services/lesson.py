@@ -34,7 +34,7 @@ class LessonService(BaseService[Lesson]):
     async def patch_instance(
         self, pk: int, user: User, instance_pydantic_model: UpdateLessonSchema, session: AsyncSession
     ) -> LessonSchema:
-        lesson = await self.repository.get_instance_by_pk(pk, session)
+        lesson = await self.get_instance_by_pk(pk, session)
         await self.course_service.handling_valid_instructor(
             lesson.course_id, user, session
         )

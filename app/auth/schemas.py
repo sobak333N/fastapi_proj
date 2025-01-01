@@ -58,6 +58,14 @@ admin_config = {
         }
     }
 }
+login_config = {
+    "json_schema_extra": {
+        "example": {
+            "email": "instructor@ya.ru",
+            "password": "Q1w2e3r4-",
+        }
+    }
+}
 
 class UserCreateModel(BaseModel):
     first_name: str = Field(min_length=1, max_length=25)
@@ -161,6 +169,8 @@ class AdminCreateModel(UserCreateModel):
 class UserLoginModel(BaseModel):
     email: str = Field(max_length=40)
     password: str = Field(min_length=8)
+    
+    model_config = login_config
 
 
 class PasswordResetRequestModel(BaseModel):
