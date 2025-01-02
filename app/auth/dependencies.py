@@ -92,9 +92,6 @@ class RefreshTokenDepends:
         if not token_data:
             raise RefreshTokenRequired()
 
-        print(token_data)
-        print(token)
-
 #       validate token in db
         refresh_token_in_whitelist = await user_repository.refresh_token_exists(token, session)
         if not refresh_token_in_whitelist:
@@ -134,8 +131,8 @@ class RoleChecker:
         self.allowed_roles = set(allowed_roles)
 
     def __call__(self, current_user: User = Depends(get_current_user)) -> bool:
-        print(current_user.role)
-        print(self.allowed_roles)
+        # print(current_user.role)
+        # print(self.allowed_roles)
         if current_user.role in self.allowed_roles or current_user.role in set(map(lambda x: x.value, self.allowed_roles)):
             return True
 

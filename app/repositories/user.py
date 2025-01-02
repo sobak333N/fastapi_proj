@@ -154,15 +154,3 @@ class BaseUserRepository(BaseRepository[T]):
         instance = result.scalars().first()
         return instance
     
-    # async def update_instance(self, instance: T, session: AsyncSession, **kwargs) -> Optional[T]:
-    #     # if kwargs:
-    #         # for attr, value in kwargs.items():
-    #             # setattr(instance, attr, value)
-    #     for attr, value in instance.__dict__.items():
-    #         setattr(instance, attr, value)
-    #     session.add(instance)
-    #     print("BEFORE COMMIT2")
-    #     print(session.__dict__)
-    #     await session.commit()
-    #     print("AFTER COMMIT2")
-    #     return instance

@@ -1,9 +1,8 @@
 
 # models/lesson.py
 from typing import List, Union
-from enum import Enum as PyEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import (
     Column, Integer, 
     String, Boolean, 
@@ -13,43 +12,12 @@ from sqlalchemy.orm import relationship
 from beanie import Document
 
 from app.core.db import Base
+from app.schemas.other import (
+    TextMaterial, ImageMaterial, VideoMaterial, 
+    FormulaMaterial, TaskMaterial, SerializeMaterial,
+    FullTaskMaterial,
+)
 
-
-class MaterialType(PyEnum):
-    text = "text"
-    image = "image"
-    video = "video"
-    formula = "formula"
-    lesson_task = "task"
-
-
-class BaseMaterial(BaseModel):
-    type: MaterialType = Field(..., description="Тип материала") 
-
-
-class TextMaterial(BaseMaterial):
-    type: MaterialType = MaterialType.text
-    data: str = Field(..., description="Текст материала")
-
-
-class ImageMaterial(BaseMaterial):
-    type: MaterialType = MaterialType.image
-    data: str = Field(..., description="Ссылка на изображение")
-
-
-class VideoMaterial(BaseMaterial):
-    type: MaterialType = MaterialType.video
-    data: str = Field(..., description="Ссылка на видео")
-
-
-class FormulaMaterial(BaseMaterial):
-    type: MaterialType = MaterialType.formula
-    data: str = Field(..., description="Формула в LaTeX формате")
-
-
-class TaskMaterial(BaseMaterial):
-    type: MaterialType = MaterialType.lesson_task
-    lesson_task_id: int = Field(..., description="ID задачи из MongoDB")
 
 
 class LessonDocument(Document):
@@ -64,6 +32,15 @@ class LessonDocument(Document):
     
     class Settings:
         name = "lesson"
+
+    @model_validator(mode="after")
+    def materials_validator(cls, model):
+        model.materials = [
+            material if isinstance(material, TaskMaterial)
+            else SerializeMaterial.process(material, SerializeMaterial.material_type_dict)
+            for material in model.materials
+        ]
+        return model
 
 
 class Lesson(Base):

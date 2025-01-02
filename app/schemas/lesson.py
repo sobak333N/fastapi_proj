@@ -1,14 +1,13 @@
 from typing import Union, List
 import copy
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
-from app.models.lesson import (
-    MaterialType, TextMaterial, 
-    ImageMaterial, VideoMaterial, 
-    FormulaMaterial, TaskMaterial,
+from app.schemas.other import (
+    TextMaterial, ImageMaterial, VideoMaterial, 
+    FormulaMaterial, TaskMaterial, SerializeMaterial,
+    FullTaskMaterial
 )
-from app.schemas.lesson_task import LessonTaskSchema
 
 
 InputLessonSchema_model_config = {
@@ -38,6 +37,7 @@ UpdateLessonSchema_model_config["json_schema_extra"]["examples"][0]["materials"]
 UpdateLessonSchema_model_config["json_schema_extra"]["examples"][0].pop('lesson_id')
 
 
+
 class InputLessonSchema(BaseModel):
     course_id: int = Field(..., description="course_id")
     lesson_name: str = Field(..., description="lesson_name")
@@ -54,6 +54,16 @@ class UpdateLessonSchema(InputLessonSchema):
         default=[],
         description="materials"
     )
+    
+    @model_validator(mode="after")
+    def materials_validator(cls, model):
+        model.materials = [
+            material if isinstance(material, TaskMaterial)
+            else SerializeMaterial.process(material, SerializeMaterial.material_type_dict)
+            for material in model.materials
+        ]
+        return model
+    
     model_config = UpdateLessonSchema_model_config
 
 
@@ -61,10 +71,6 @@ class LessonSchema(UpdateLessonSchema):
     lesson_id: int = Field(..., description="lesson_id")
     
     model_config = LessonSchema_model_config
-
-
-class FullTaskMaterial(TaskMaterial):
-    lesson_task: LessonTaskSchema
 
 
 class GetLessonSchema(LessonSchema):
@@ -75,3 +81,12 @@ class GetLessonSchema(LessonSchema):
         default=[],
         description="materials"
     )
+    
+    @model_validator(mode="after")
+    def materials_validator(cls, model):
+        model.materials = [
+            material if isinstance(material, TaskMaterial)
+            else SerializeMaterial.process(material, SerializeMaterial.get_lesson_material_type_dict)
+            for material in model.materials
+        ]
+        return model

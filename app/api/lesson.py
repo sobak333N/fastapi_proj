@@ -7,7 +7,7 @@ from app.models import User
 from app.models.user import Roles2
 from app.schemas import (
     InputLessonSchema, LessonSchema,
-    UpdateLessonSchema
+    UpdateLessonSchema, GetLessonSchema
 )
 from app.core.db import get_db
 from app.auth.dependencies import (
@@ -52,7 +52,7 @@ async def delete_lesson(
     return await lesson_service.delete_instance(lesson_id, user, session)
 
 
-@lesson_router.get("/get/{lesson_id}", status_code=status.HTTP_200_OK)
+@lesson_router.get("/get/{lesson_id}", status_code=status.HTTP_200_OK, response_model=GetLessonSchema)
 async def get_lesson(
     lesson_id: int,
     session: AsyncSession=Depends(get_db),

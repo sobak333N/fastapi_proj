@@ -8,8 +8,8 @@ from app.models import (
     LessonTask, LessonTaskDocument, 
     User, Lesson, LessonDocument,
 )
-from app.models.lesson import MaterialType, TaskMaterial
 from app.repositories.base_repository import DocumentRepository
+from app.schemas.other import MaterialType, TaskMaterial
 from app.schemas import LessonTaskSchema
 
 

@@ -7,7 +7,10 @@ from fastapi.encoders import jsonable_encoder
 from app.repositories.base_repository import DocumentRepository
 from app.models import Lesson, LessonDocument, User, LessonTaskDocument
 from app.models.lesson import TaskMaterial
-from app.schemas import LessonSchema, GetLessonSchema
+from app.schemas import (
+    LessonSchema, GetLessonSchema, 
+    FullTaskMaterial, LessonTaskSchema,
+)
 
 
 class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
@@ -75,7 +78,7 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
         ).delete_many()
         await super().delete_instance(instance, session, no_commit)
         
-    async def get_document_by_pk(self, pk: int, session: AsyncSession) -> GetLessonSchema:
+    async def get_document_by_pk(self, pk: int, lesson: Lesson, session: AsyncSession) -> GetLessonSchema:
         lesson_document = await self.document_model.find_one(
             self.document_model.lesson_id==pk
         )
@@ -83,14 +86,20 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
             LessonTaskDocument.lesson_id==pk
         ).to_list()
         
-        def find_in_lesson_task_documents(lesson_task_id: int) -> LessonTaskDocument:
+        def find_in_lesson_task_documents(lesson_task_id: int) -> FullTaskMaterial:
             for lesson_task in lesson_task_documents:
                 if lesson_task.lesson_task_id == lesson_task_id:
-                    return lesson_task
-            
+                    jsonable_encoded_data = jsonable_encoder(lesson_task)
+                    return FullTaskMaterial(
+                        lesson_task=LessonTaskSchema(**jsonable_encoded_data)
+                    )
+ 
         lesson_document.materials = [
             material if not isinstance(material, TaskMaterial) 
             else find_in_lesson_task_documents(material.lesson_task_id) 
             for material in lesson_document.materials
         ]
-        return lesson_document
+        return GetLessonSchema(
+            course_id=lesson.course_id,
+            **jsonable_encoder(lesson_document)
+        )

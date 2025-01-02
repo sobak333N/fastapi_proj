@@ -32,4 +32,8 @@ from .lesson_task import (
     InputLessonTaskSchema,
     UpdateLessonTaskSchema,
 )
-from .other import PagedResponseSchema
+from .other import (
+    FullTaskMaterial,
+    PagedResponseSchema,
+    SerializeMaterial,
+)

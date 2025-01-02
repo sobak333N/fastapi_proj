@@ -44,6 +44,9 @@ class LessonService(BaseService[Lesson]):
     async def patch_instance(
         self, pk: int, user: User, instance_pydantic_model: UpdateLessonSchema, session: AsyncSession
     ) -> LessonSchema:
+        for material in instance_pydantic_model.materials:
+            print(type(material))  
+        print(instance_pydantic_model.materials)
         lesson = await self.handling_valid_instructor(pk, user, session)
         if lesson.course_id != instance_pydantic_model.course_id:
             await self.course_service.handling_valid_instructor(
@@ -84,5 +87,5 @@ class LessonService(BaseService[Lesson]):
                 session=session,
             )
             if not student_access:
-                InsufficientPermission()
-        return await self.repository.get_document_by_pk(pk, session)
+                raise InsufficientPermission()
+        return await self.repository.get_document_by_pk(pk, lesson, session)
