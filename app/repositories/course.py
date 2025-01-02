@@ -38,14 +38,14 @@ class CourseRepository(BaseRepository[Course]):
 
     async def check_access_of_user(
         self,
-        course: Course, 
+        course_id: int, 
         student_id: int,
         session: AsyncSession,
     ) -> bool:
         statement = (
             select(StudentCourse)
             .where(StudentCourse.student_id==student_id)
-            .where(StudentCourse.course_id==course.course_id)
+            .where(StudentCourse.course_id==course_id)
         )
         result = await session.execute(statement)
         result = result.scalars().first()

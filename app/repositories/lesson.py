@@ -6,7 +6,8 @@ from fastapi.encoders import jsonable_encoder
 
 from app.repositories.base_repository import DocumentRepository
 from app.models import Lesson, LessonDocument, User, LessonTaskDocument
-from app.schemas import LessonSchema
+from app.models.lesson import TaskMaterial
+from app.schemas import LessonSchema, GetLessonSchema
 
 
 class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
@@ -73,3 +74,23 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
             LessonTaskDocument.lesson_id==instance.lesson_id 
         ).delete_many()
         await super().delete_instance(instance, session, no_commit)
+        
+    async def get_document_by_pk(self, pk: int, session: AsyncSession) -> GetLessonSchema:
+        lesson_document = await self.document_model.find_one(
+            self.document_model.lesson_id==pk
+        )
+        lesson_task_documents = await LessonTaskDocument.find(
+            LessonTaskDocument.lesson_id==pk
+        ).to_list()
+        
+        def find_in_lesson_task_documents(lesson_task_id: int) -> LessonTaskDocument:
+            for lesson_task in lesson_task_documents:
+                if lesson_task.lesson_task_id == lesson_task_id:
+                    return lesson_task
+            
+        lesson_document.materials = [
+            material if not isinstance(material, TaskMaterial) 
+            else find_in_lesson_task_documents(material.lesson_task_id) 
+            for material in lesson_document.materials
+        ]
+        return lesson_document

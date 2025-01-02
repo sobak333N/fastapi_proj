@@ -50,3 +50,13 @@ async def delete_lesson(
     permission: bool=Depends(RoleChecker([Roles2.instructor])),
 ):
     return await lesson_service.delete_instance(lesson_id, user, session)
+
+
+@lesson_router.get("/get/{lesson_id}", status_code=status.HTTP_200_OK)
+async def get_lesson(
+    lesson_id: int,
+    session: AsyncSession=Depends(get_db),
+    user: User=Depends(get_current_user),
+    permission: bool=Depends(RoleChecker([Roles2.instructor, Roles2.student])),
+):
+    return await lesson_service.get_document_by_pk(lesson_id, user, session)

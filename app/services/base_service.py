@@ -17,9 +17,9 @@ T = TypeVar('T')
 
 
 class BaseService(Generic[T]):
-    def __init__(self, repository: Type[BaseRepository], model_name: str):
-        self.repository = repository()
-        self.model_name = model_name
+    def __init__(self, repository: Type[BaseRepository[T]], model_name: str):
+        self.repository: BaseRepository[T] = repository()
+        self.model_name: str = model_name
 
     async def get_instance_by_pk(self, pk: int, session: AsyncSession) -> Optional[T]:
         instance = await self.repository.get_instance_by_pk(pk, session)

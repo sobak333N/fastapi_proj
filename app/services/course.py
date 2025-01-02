@@ -67,7 +67,7 @@ class CourseService(BaseService[Course]):
                     return False
             elif user.role == Roles2.student:
                 student_access = await self.repository.check_access_of_user(
-                    course=course, 
+                    course_id=course.course_id, 
                     student_id=user.student.student_id, 
                     session=session,
                 )

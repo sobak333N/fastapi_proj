@@ -3,14 +3,15 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 
-from app.errors import NotCorrectLessonTasks
+from app.errors import NotCorrectLessonTasks, InsufficientPermission
 from app.services.base_service import BaseService
 from app.repositories import LessonRepository, LessonTaskRepository
 from app.models import User, Lesson
 from app.models.lesson import TaskMaterial
+from app.models.user import Roles2
 from app.schemas import (
     InputLessonSchema, LessonSchema,
-    UpdateLessonSchema,
+    UpdateLessonSchema, GetLessonSchema
 )
 from app.services import CourseService
 
@@ -69,4 +70,19 @@ class LessonService(BaseService[Lesson]):
     ) -> None:
         lesson = await self.handling_valid_instructor(pk, user, session)
         return await self.repository.delete_instance(lesson, session)
-        ...
+    
+    async def get_document_by_pk(
+        self, pk: int, user: User, session: AsyncSession
+    ) -> GetLessonSchema:
+        if user.role == Roles2.instructor:
+            lesson = await self.handling_valid_instructor(pk, user, session)
+        elif user.role == Roles2.student:
+            lesson = await self.get_instance_by_pk(pk, session)
+            student_access = await self.course_service.repository.check_access_of_user(
+                course_id=lesson.course_id, 
+                student_id=user.student.student_id, 
+                session=session,
+            )
+            if not student_access:
+                InsufficientPermission()
+        return await self.repository.get_document_by_pk(pk, session)
