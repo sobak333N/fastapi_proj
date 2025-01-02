@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     EMAIL_TOKENS_EX_MINUTES: int
 
     PAGE_LIMIT: int
+    MIN_TEST_RESULT_TO_PASS: int
 
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -35,7 +36,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     REDIS_HOST: str    
     REDIS_INNER_PORT: int
-
+    
     TESTING: str
 
     @property

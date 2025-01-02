@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas import (
     ShortStudentResponse, UpdateStudentResponse,
-    StudentResponse
+    StudentResponse, LessonStudentAnswers,
 )
 from app.core.db import get_db
 from app.services import StudentService
@@ -28,8 +28,18 @@ async def get_student_by_id(
     return reponse
 
 
+@student_router.patch("/patch", status_code=status.HTTP_200_OK, response_model=StudentResponse)
+async def patch_instructor(
+    student_model: UpdateStudentResponse,
+    session: AsyncSession=Depends(get_db),
+    user: User=Depends(get_current_user),
+    permission: bool=Depends(RoleChecker([Roles2.student]))
+):
+    return await student_service.patch_instance(student_model, user, session)
+
+
 @student_router.post("/buy-course/{course_id}", status_code=status.HTTP_200_OK)
-async def get_student_by_id(
+async def buy_course(
     course_id: int,
     payment_type: PaymentType,
     session: AsyncSession=Depends(get_db),
@@ -43,12 +53,16 @@ async def get_student_by_id(
         payment_type=payment_type,
         session=session
     )
-    
-@student_router.patch("/patch", status_code=status.HTTP_200_OK, response_model=StudentResponse)
-async def patch_instructor(
-    student_model: UpdateStudentResponse,
+
+
+@student_router.post("/answer/{lesson_id}", status_code=status.HTTP_200_OK)
+async def answer_on_lesson(
+    lesson_id: int,
+    student_answers: LessonStudentAnswers,
     session: AsyncSession=Depends(get_db),
     user: User=Depends(get_current_user),
     permission: bool=Depends(RoleChecker([Roles2.student]))
 ):
-    return await student_service.patch_instance(student_model, user, session)
+    return await student_service.answer_on_lesson(
+        lesson_id, user, student_answers, session
+    )

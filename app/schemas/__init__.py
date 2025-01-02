@@ -7,6 +7,9 @@ from .student import (
     StudentResponse, 
     ShortStudentResponse,
     UpdateStudentResponse,
+    LessonStudentAnswers,
+    LessonStudentAnswerResponse,
+    LessonStudentAnswersResponse,
 )
 from .category import ( 
     InputCategorySchema, 
@@ -21,7 +24,6 @@ from .course import (
     CoursePagedResponseSchema,
     PrivateResponseCourseSchema,
 )
-
 from .lesson import (
     ShortLessonSchema,
     LessonSchema,

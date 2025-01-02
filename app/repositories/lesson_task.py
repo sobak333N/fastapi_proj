@@ -79,6 +79,13 @@ class LessonTaskRepository(DocumentRepository[LessonTask, LessonTaskDocument]):
         tasks = await session.execute(stmt)
         return tasks.scalars().all()
 
+    async def get_all_task_documents_of_lesson(
+        self, lesson: Lesson
+    ) -> List[LessonTaskDocument]:
+        return await LessonTaskDocument.find(
+            LessonTaskDocument.lesson_id==lesson.lesson_id
+        ).to_list()
+
     @RedisLessonTask.del_cache("lesson_")
     async def update_instance(
         self, instance: LessonTask, session: AsyncSession, no_commit: bool=False, **kwargs

@@ -1,6 +1,7 @@
-from typing import Optional, Any
+from typing import Optional, Any, List
 
-from pydantic import Field
+from pydantic import Field, BaseModel 
+
 from app.schemas.user import UserResponse
 from app.models.student import SubscriptionPlan, LearningStyle
 
@@ -59,3 +60,41 @@ class UpdateStudentResponse(ShortStudentResponse):
                 ]
             },
         }
+
+
+class LessonStudentAnswer(BaseModel):
+    lesson_task_id: int = Field(..., description="lesson_task_id")
+    answer: str = Field(..., description="answer")
+    
+
+class LessonStudentAnswers(BaseModel):
+    answers: List[LessonStudentAnswer] = Field(...)
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                "answers": [
+                    {
+                        "lesson_task_id": 315,
+                        "answer": "10"
+                    },
+                    {
+                        "lesson_task_id": 316,
+                        "answer": "228"
+                    },
+                ]
+                }
+            ]
+        },
+    }
+
+class LessonStudentAnswerResponse(LessonStudentAnswer):
+    correct: bool = Field(..., description="correct")
+
+
+class LessonStudentAnswersResponse(LessonStudentAnswers):
+    answers: List[LessonStudentAnswerResponse] = Field(...)
+    lesson_id: int = Field(..., description="lesson_id")
+    result: int = Field(..., description="result")
+    done: bool = Field(..., description="done")
+    
