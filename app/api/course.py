@@ -85,12 +85,11 @@ async def get_courses(
 @course_router.get(
     "/get/{course_id}", 
     status_code=status.HTTP_200_OK, 
-    response_model=PrivateResponseCourseSchema
+    response_model=Union[PrivateResponseCourseSchema,FullResponseCourseSchema]
 )
 async def get_course_by_id(
     course_id: int,
     session: AsyncSession=Depends(get_db),
     user: User=Depends(not_required_get_current_user)
 ):
-    course: Course = await course_service.get_instance_by_pk(course_id, user, session)
-    return course
+    return await course_service.get_instance_by_pk(course_id, user, session)

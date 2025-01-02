@@ -45,6 +45,7 @@ async def patch_instructor(
     # reponse = ShortInstructorResponse(**jsonable_encoder(instructor)).model_dump()
     # return reponse
     
+    
 @instructor_router.post("/upload-file", status_code=status.HTTP_200_OK, response_model=S3LinkResponse)
 async def upload_file(
     permission: bool=Depends(RoleChecker([Roles2.instructor])),

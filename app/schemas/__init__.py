@@ -23,6 +23,7 @@ from .course import (
 )
 
 from .lesson import (
+    ShortLessonSchema,
     LessonSchema,
     InputLessonSchema,
     UpdateLessonSchema,
@@ -34,6 +35,7 @@ from .lesson_task import (
     UpdateLessonTaskSchema,
 )
 from .other import (
+    S3LinkResponse,
     FullTaskMaterial,
     PagedResponseSchema,
     SerializeMaterial,

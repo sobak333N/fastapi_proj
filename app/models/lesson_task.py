@@ -9,7 +9,7 @@ from sqlalchemy import (
     Index,
 )
 from sqlalchemy.orm import relationship
-from beanie import Document
+from beanie import Document, Indexed
 
 from app.core.db import Base
 
@@ -20,8 +20,8 @@ class TaskTypeEnum(PyEnum):
 
 
 class LessonTaskDocument(Document):
-    lesson_task_id: int = Field(..., description="lesson_task_id")
-    lesson_id: int = Field(..., description="lesson_id")
+    lesson_task_id: int = Indexed()
+    lesson_id: int = Indexed()
     question: str = Field(..., description="question")
     task_type: TaskTypeEnum = Field(..., description="task_type")
     options: Optional[List[str]] = Field(default=None)

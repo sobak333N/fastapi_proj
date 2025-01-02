@@ -1,14 +1,13 @@
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
 from fastapi.encoders import jsonable_encoder
 
 from app.repositories.base_repository import DocumentRepository
 from app.models import Lesson, LessonDocument, User, LessonTaskDocument
 from app.models.lesson import TaskMaterial
 from app.schemas import (
-    LessonSchema, GetLessonSchema, 
+    LessonSchema, GetLessonSchema, ShortLessonSchema,
     FullTaskMaterial, LessonTaskSchema,
 )
 
@@ -102,4 +101,4 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
         return GetLessonSchema(
             course_id=lesson.course_id,
             **jsonable_encoder(lesson_document)
-        )
+        )        

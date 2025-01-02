@@ -37,6 +37,10 @@ UpdateLessonSchema_model_config["json_schema_extra"]["examples"][0]["materials"]
 UpdateLessonSchema_model_config["json_schema_extra"]["examples"][0].pop('lesson_id')
 
 
+class ShortLessonSchema(BaseModel):
+    lesson_id: int = Field(..., description="lesson_id")
+    lesson_name: str = Field(..., description="lesson_name")
+    
 
 class InputLessonSchema(BaseModel):
     course_id: int = Field(..., description="course_id")

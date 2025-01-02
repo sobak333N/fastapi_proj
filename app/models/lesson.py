@@ -9,7 +9,7 @@ from sqlalchemy import (
     ForeignKey, Index,
 )
 from sqlalchemy.orm import relationship
-# from beanie import Document
+from beanie import Document, Indexed
 
 from app.core.db import Base
 from app.schemas.other import (
@@ -19,57 +19,10 @@ from app.schemas.other import (
 )
 
 
-<<<<<<< HEAD
-# class MaterialType(PyEnum):
-#     text = "text"
-#     image = "image"
-#     video = "video"
-#     formula = "formula"
-#     lesson_task = "task"
 
-
-# class BaseMaterial(BaseModel):
-#     type: MaterialType = Field(..., description="Тип материала") 
-
-
-# class TextMaterial(BaseMaterial):
-#     type: MaterialType = MaterialType.text
-#     data: str = Field(..., description="Текст материала")
-
-
-# class ImageMaterial(BaseMaterial):
-#     type: MaterialType = MaterialType.image
-#     data: str = Field(..., description="Ссылка на изображение")
-
-
-# class VideoMaterial(BaseMaterial):
-#     type: MaterialType = MaterialType.video
-#     data: str = Field(..., description="Ссылка на видео")
-
-
-# class FormulaMaterial(BaseMaterial):
-#     type: MaterialType = MaterialType.formula
-#     data: str = Field(..., description="Формула в LaTeX формате")
-
-
-# class TaskMaterial(BaseMaterial):
-#     type: MaterialType = MaterialType.lesson_task
-#     lesson_task_id: int = Field(..., description="ID задачи из MongoDB или SQL")
-
-
-# class LessonDocument(Document):
-#     lesson_id: int
-#     lesson_name: str
-#     materials: List[
-#         Union[TextMaterial, ImageMaterial, VideoMaterial, FormulaMaterial, TaskMaterial]
-#     ] = Field(
-#         default=[],
-#         description="Материалы урока"
-#     )
-=======
 
 class LessonDocument(Document):
-    lesson_id: int
+    lesson_id: int = Indexed()
     lesson_name: str
     materials: List[
         Union[TextMaterial, ImageMaterial, VideoMaterial, FormulaMaterial, TaskMaterial]
@@ -89,7 +42,6 @@ class LessonDocument(Document):
             for material in model.materials
         ]
         return model
->>>>>>> feat/mongoDB
 
 
 class Lesson(Base):

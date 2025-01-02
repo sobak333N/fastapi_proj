@@ -1,6 +1,8 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel
+import asyncio
 
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +13,8 @@ from app.repositories import CourseRepository
 from app.services import CategoryService
 from app.errors import InsufficientPermission
 from app.base_responses import BaseSuccessResponse
+from app.schemas import PrivateResponseCourseSchema, FullResponseCourseSchema
+from app.core.db import get_session 
 
 
 class CourseService(BaseService[Course]):
@@ -53,12 +57,27 @@ class CourseService(BaseService[Course]):
     async def instance_exists(self, pk: int, session: AsyncSession) -> bool:
         return bool(await super().get_instance_by_pk(pk, session))
 
-    async def get_instance_by_pk(self, pk: int, user: User, session: AsyncSession):
-        course = await super().get_instance_by_pk(pk, session)
-        access = await self.check_access_to_course(course, user, session)
-        if not access:
-            delattr(course, 'private_info')
-        return course
+    async def get_instance_by_pk(
+        self, pk: int, user: User, session: AsyncSession
+    ) -> Union[PrivateResponseCourseSchema, FullResponseCourseSchema]:
+        async with get_session() as course_session, get_session() as lesson_session:
+            async def get_course(self):
+                course = await super().get_instance_by_pk(pk, course_session)
+                access = await self.check_access_to_course(course, user, course_session)
+                return course, access
+            task_get_course = asyncio.create_task(get_course(self))
+            task_get_lesson = asyncio.create_task(
+                self.repository.get_all_lessons_of_course(pk, lesson_session)
+            )
+            (course, access), lessons = await asyncio.gather(task_get_course, task_get_lesson)
+                        
+            if not access:
+                delattr(course, 'private_info')
+                return FullResponseCourseSchema(**jsonable_encoder(course))
+            return PrivateResponseCourseSchema(
+                **jsonable_encoder(course),
+                lessons=lessons
+            )
     
     async def check_access_to_course(self, course: Course, user: User, session: AsyncSession) -> bool:
         if user:

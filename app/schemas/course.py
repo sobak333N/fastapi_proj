@@ -4,6 +4,8 @@ from pydantic_core import PydanticCustomError
 
 from app.schemas.other import PagedResponseSchema
 from app.models.course import Difficulty
+from app.schemas.lesson import ShortLessonSchema 
+
 
 course_config = {
     "json_schema_extra": {
@@ -26,7 +28,7 @@ class BaseCourseSchema(BaseModel):
 class InputCourseSchema(BaseCourseSchema):
     instructor_id: Optional[int]=None
     model_config = course_config
-    private_info: Optional[str] = None
+    private_info: Optional[str] = Field(default=None)
     @field_validator("private_info", mode="after")
     def validate_private_info(cls, value: str, info):
         if value is not None and not value.strip():
@@ -46,9 +48,9 @@ class ShortResponseCourseSchema(BaseCourseSchema):
 class FullResponseCourseSchema(ShortResponseCourseSchema):
     pass
 
-class PrivateResponseCourseSchema(InputCourseSchema, FullResponseCourseSchema):
-    pass
 
+class PrivateResponseCourseSchema(InputCourseSchema, FullResponseCourseSchema):
+    lessons: List[ShortLessonSchema] = Field(..., description="list of lessons of this course")
 
 
 class CoursePagedResponseSchema(PagedResponseSchema):

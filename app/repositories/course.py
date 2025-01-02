@@ -9,6 +9,7 @@ from app.models import (
     Course, User, StudentCourse,
     Lesson, LessonDocument, LessonTaskDocument,
 )
+from app.schemas import ShortLessonSchema
 from app.models.course import PaymentStatus
 from app.config import Config
 
@@ -52,17 +53,21 @@ class CourseRepository(BaseRepository[Course]):
         if not result or result.payment_status != PaymentStatus.done:
             return False
         return True
-    
+
+    async def get_all_lesson_ids(
+        self, course_id: int, session: AsyncSession
+    ) -> List[int]:
+        statement = (
+            select(Lesson.lesson_id)
+            .where(Lesson.course_id == course_id)
+        )
+        lessons = await session.execute(statement)
+        return [row.lesson_id for row in lessons.fetchall()]
+
     async def delete_instance(
         self, instance: Course, session: AsyncSession, no_commit: bool=False
     ) -> None:
-        statement = (
-            select(Lesson.lesson_id)
-            .where(Lesson.course_id == instance.course_id)
-        )
-        lessons = await session.execute(statement)
-        lesson_ids = [row.lesson_id for row in lessons.fetchall()]
-
+        lesson_ids = await self.get_all_lesson_ids(instance.course_id, session)
         await LessonDocument.find(
             In(LessonDocument.lesson_id, lesson_ids)
         ).delete_many()
@@ -71,3 +76,16 @@ class CourseRepository(BaseRepository[Course]):
         ).delete_many()
 
         return await super().delete_instance(instance, session, no_commit)
+
+    async def get_all_lessons_of_course(
+        self, course_id: int, session: AsyncSession
+    ) -> List[ShortLessonSchema]:
+        lesson_ids = await self.get_all_lesson_ids(course_id, session)
+        lesson_documents = await LessonDocument.find(
+            In(LessonDocument.lesson_id, lesson_ids)
+        ).to_list()
+        lessons: List[ShortLessonSchema] = [
+            ShortLessonSchema(lesson_id=lesson_id, lesson_name=lesson_document.lesson_name)
+            for lesson_id, lesson_document in zip(lesson_ids, lesson_documents)
+        ]
+        return lessons
