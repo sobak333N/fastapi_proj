@@ -21,7 +21,7 @@ lesson_router = APIRouter()
 lesson_service = LessonService()
 
 
-@lesson_router.post("create/", status_code=status.HTTP_201_CREATED, response_model=LessonSchema)
+@lesson_router.post("/create/", status_code=status.HTTP_201_CREATED, response_model=LessonSchema)
 async def create_lesson(
     lesson_model: InputLessonSchema, 
     session: AsyncSession=Depends(get_db),
@@ -31,7 +31,7 @@ async def create_lesson(
     return await lesson_service.create_instance(user, lesson_model, session)
 
 
-@lesson_router.patch("update/{lesson_id}", status_code=status.HTTP_200_OK, response_model=LessonSchema)
+@lesson_router.patch("/update/{lesson_id}", status_code=status.HTTP_200_OK, response_model=LessonSchema)
 async def update_lesson(
     lesson_id: int,
     lesson_model: UpdateLessonSchema,
@@ -40,4 +40,13 @@ async def update_lesson(
     permission: bool=Depends(RoleChecker([Roles2.instructor])),
 ):
     return await lesson_service.patch_instance(lesson_id, user, lesson_model, session)
-    ...
+    
+    
+@lesson_router.delete("/delete/{lesson_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_lesson(
+    lesson_id: int,
+    session: AsyncSession=Depends(get_db),
+    user: User=Depends(get_current_user),
+    permission: bool=Depends(RoleChecker([Roles2.instructor])),
+):
+    return await lesson_service.delete_instance(lesson_id, user, session)

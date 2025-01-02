@@ -29,5 +29,6 @@ from .lesson import (
 from .lesson_task import (
     LessonTaskSchema,
     InputLessonTaskSchema,
+    UpdateLessonTaskSchema,
 )
 from .other import PagedResponseSchema

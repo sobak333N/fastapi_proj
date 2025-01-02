@@ -45,7 +45,13 @@ class Course(Base):
 
     category = relationship('Category', back_populates='course') 
     instructor = relationship('Instructor', back_populates='course') 
-    lesson = relationship('Lesson', back_populates='course', lazy='noload') 
+    lesson = relationship(
+        'Lesson', 
+        back_populates='course', 
+        lazy='noload',
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    ) 
 
 
     __table_args__ = (

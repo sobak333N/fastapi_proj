@@ -34,7 +34,9 @@ class LessonTask(Base):
     __tablename__ = 'lesson_tasks'
     
     lesson_task_id = Column(Integer, primary_key=True)
-    lesson_id = Column(Integer, ForeignKey('lessons.lesson_id'), nullable=False)
+    lesson_id = Column(
+        Integer, ForeignKey('lessons.lesson_id', ondelete='CASCADE'), nullable=False
+    )
 
     lesson = relationship("Lesson", back_populates="lesson_task")
 

@@ -21,6 +21,15 @@ class LessonService(BaseService[Lesson]):
         self.course_service = CourseService()
         self.lesson_task_repository = LessonTaskRepository()
 
+    async def handling_valid_instructor(
+        self, pk: int, user: User, session: AsyncSession
+    ) -> Lesson:
+        lesson = await self.get_instance_by_pk(pk, session)
+        await self.course_service.handling_valid_instructor(
+            lesson.course_id, user, session
+        )
+        return lesson
+    
     async def create_instance(
         self, user: User, instance_pydatinc_model: InputLessonSchema, session: AsyncSession
     ) -> Optional[LessonSchema]:
@@ -34,10 +43,7 @@ class LessonService(BaseService[Lesson]):
     async def patch_instance(
         self, pk: int, user: User, instance_pydantic_model: UpdateLessonSchema, session: AsyncSession
     ) -> LessonSchema:
-        lesson = await self.get_instance_by_pk(pk, session)
-        await self.course_service.handling_valid_instructor(
-            lesson.course_id, user, session
-        )
+        lesson = await self.handling_valid_instructor(pk, user, session)
         if lesson.course_id != instance_pydantic_model.course_id:
             await self.course_service.handling_valid_instructor(
                 instance_pydantic_model.course_id, user, session
@@ -58,5 +64,9 @@ class LessonService(BaseService[Lesson]):
         jsonable_encoded_data = jsonable_encoder(instance_pydantic_model)
         return await self.repository.update_instance(lesson, session, **jsonable_encoded_data)
         
-
-        
+    async def delete_instance(
+        self, pk: int, user: User, session: AsyncSession
+    ) -> None:
+        lesson = await self.handling_valid_instructor(pk, user, session)
+        return await self.repository.delete_instance(lesson, session)
+        ...

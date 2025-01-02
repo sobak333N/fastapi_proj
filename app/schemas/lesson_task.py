@@ -72,3 +72,7 @@ class LessonTaskSchema(InputLessonTaskSchema):
     lesson_task_id: int = Field(..., description="lesson_id")
 
     model_config = LessonTaskSchema_model_config
+
+
+class UpdateLessonTaskSchema(InputLessonTaskSchema):
+    pass

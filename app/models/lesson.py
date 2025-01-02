@@ -70,10 +70,17 @@ class Lesson(Base):
     __tablename__ = 'lessons'
     
     lesson_id = Column(Integer, primary_key=True)
-    course_id = Column(Integer, ForeignKey('course.course_id'), nullable=False)
+    course_id = Column(
+        Integer, ForeignKey('course.course_id', ondelete='CASCADE'), nullable=False
+    )
 
     course = relationship("Course", back_populates="lesson")
-    lesson_task = relationship("LessonTask", back_populates="lesson")
+    lesson_task = relationship(
+        "LessonTask",
+        back_populates="lesson",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
 
     __table_args__ = (
         Index('idx_lessons_lesson_id', 'lesson_id'),
