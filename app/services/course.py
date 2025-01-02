@@ -15,6 +15,7 @@ from app.errors import InsufficientPermission
 from app.base_responses import BaseSuccessResponse
 from app.schemas import PrivateResponseCourseSchema, FullResponseCourseSchema
 from app.core.db import get_session 
+from app.repositories.redis import RedisInstanced
 
 
 class CourseService(BaseService[Course]):

@@ -1,12 +1,14 @@
 from functools import wraps
-from typing import Optional, Callable, Coroutine
+from typing import Optional, Callable, Coroutine, Type
 import re
 import json
 
 from fastapi.encoders import jsonable_encoder
 import redis.asyncio as aioredis
 from redis.asyncio import Redis
+from pydantic import BaseModel
 
+from app.schemas import GetLessonSchema
 from app.config import Config
 from app.task_manager import TaskManager 
 
@@ -48,13 +50,22 @@ class RedisClass:
                 redis_client = await instance.get_redis_client()
                 result = await redis_client.get(key)
                 if result:
-                    return json.loads(result)
+                    result = json.loads(result)
+                    pydantic_model = result.get("pydantic_model")
+                    if pydantic_model and isinstance(pydantic_model, str):
+                        model_class = globals().get(pydantic_model)
+                        if model_class and issubclass(model_class, BaseModel):
+                            return model_class(**result["data"])   
+                    return result["data"]
 
                 result = await function(*args, **kwargs)
                 if result:
                     await redis_client.set(
                         name=key, 
-                        value=json.dumps((jsonable_encoder(result))),
+                        value=json.dumps({
+                            "pydantic_model": str(type(result).__name__),
+                            "data": jsonable_encoder(result)
+                        }),
                         ex=60*60*24
                     )
                 return result
@@ -104,21 +115,25 @@ class RedisPaged(RedisClass):
 
 class RedisInstanced(RedisClass):
 
+    key_suffix_type: Type=str
+
     def __init__(self, db_num: int=2):
         self.redis_client: Optional[Redis] = None
         self.db_num: int = db_num
+
+    @classmethod
+    def find_key_suffix(cls, args, kwargs):
+        for arg in args:
+            if isinstance(arg, cls.key_suffix_type):
+                return str(arg)
 
     @classmethod
     def del_cache(cls, key_prefix: str="example"):
         def inner_decorator(function: Coroutine):
             @wraps(function)
             async def wrapper(*args, **kwargs):                
-                key_suffix: str = None
-                for arg in args:
-                    if isinstance(arg, str):
-                        key_suffix = str(arg)
-                        break        
-                key = key_prefix+key_suffix
+                key_suffix: str = cls.find_key_suffix(args, kwargs)
+                key: str = key_prefix+key_suffix
                 instance = cls()
                 redis_client = await instance.get_redis_client()
                 result = await function(*args, **kwargs)

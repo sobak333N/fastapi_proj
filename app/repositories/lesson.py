@@ -1,15 +1,27 @@
-from typing import Optional, List
+from typing import Optional, List, Type
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 
 from app.repositories.base_repository import DocumentRepository
+from app.repositories.redis import RedisInstanced
 from app.models import Lesson, LessonDocument, User, LessonTaskDocument
 from app.models.lesson import TaskMaterial
 from app.schemas import (
     LessonSchema, GetLessonSchema, ShortLessonSchema,
     FullTaskMaterial, LessonTaskSchema,
 )
+
+
+class RedisLesson(RedisInstanced):
+    
+    key_suffix_type: Type=Lesson
+    
+    @classmethod
+    def find_key_suffix(cls, args, kwargs):
+        for arg in args:
+            if isinstance(arg, cls.key_suffix_type):
+                return str(arg.lesson_id)
 
 
 class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
@@ -40,7 +52,8 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
             **jsonable_encoder(lesson_relation), 
         }
         return LessonSchema(**lesson_schema_dict)
-    
+
+    @RedisLesson.del_cache("lesson_")
     async def update_instance(
         self, instance: Lesson, session: AsyncSession, no_commit: bool=False, **kwargs
     ) -> LessonSchema:
@@ -65,6 +78,7 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
         }
         return LessonSchema(**lesson_schema_dict)
     
+    @RedisLesson.del_cache("lesson_")
     async def delete_instance(
         self, instance: Lesson, session: AsyncSession, no_commit: bool=False
     ) -> None:
@@ -76,7 +90,8 @@ class LessonRepository(DocumentRepository[Lesson, LessonDocument]):
             LessonTaskDocument.lesson_id==instance.lesson_id 
         ).delete_many()
         await super().delete_instance(instance, session, no_commit)
-        
+
+    @RedisLesson.get_cache("lesson_")
     async def get_document_by_pk(self, pk: int, lesson: Lesson, session: AsyncSession) -> GetLessonSchema:
         lesson_document = await self.document_model.find_one(
             self.document_model.lesson_id==pk

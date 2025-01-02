@@ -9,9 +9,12 @@ from app.models import (
     Course, User, StudentCourse,
     Lesson, LessonDocument, LessonTaskDocument,
 )
-from app.schemas import ShortLessonSchema
+from app.schemas import (
+    ShortLessonSchema,
+)
 from app.models.course import PaymentStatus
 from app.config import Config
+
 
 
 class CourseRepository(BaseRepository[Course]):

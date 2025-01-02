@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Type
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.future import select
@@ -9,14 +9,36 @@ from app.models import (
     User, Lesson, LessonDocument,
 )
 from app.repositories.base_repository import DocumentRepository
+from app.repositories.redis import RedisInstanced
 from app.schemas.other import MaterialType, TaskMaterial
 from app.schemas import LessonTaskSchema
+
+
+class RedisLessonTask(RedisInstanced):
+    
+    key_suffix_type: Type=LessonTask
+    
+    @classmethod
+    def find_key_suffix(cls, args, kwargs):
+        for arg in args:
+            if isinstance(arg, cls.key_suffix_type):
+                return str(arg.lesson_id)
+
+
+class RedisLessonTaskCreate(RedisInstanced):
+    
+    @classmethod
+    def find_key_suffix(cls, args, kwargs):
+        for attr, value in kwargs.items():
+            if attr=="lesson_id":
+                return str(value)
 
 
 class LessonTaskRepository(DocumentRepository[LessonTask, LessonTaskDocument]):
     def __init__(self):
         super().__init__(LessonTask, LessonTaskDocument)
     
+    @RedisLessonTaskCreate.del_cache("lesson_")
     async def create_instance(
         self, 
         session: AsyncSession, 
@@ -56,7 +78,8 @@ class LessonTaskRepository(DocumentRepository[LessonTask, LessonTaskDocument]):
         )
         tasks = await session.execute(stmt)
         return tasks.scalars().all()
-        
+
+    @RedisLessonTask.del_cache("lesson_")
     async def update_instance(
         self, instance: LessonTask, session: AsyncSession, no_commit: bool=False, **kwargs
     ) -> LessonTaskSchema:
@@ -79,7 +102,8 @@ class LessonTaskRepository(DocumentRepository[LessonTask, LessonTaskDocument]):
             **jsonable_encoder(lesson_task_document)
         }
         return LessonTaskSchema(**lesson_task_schema_dict)
-    
+
+    @RedisLessonTask.del_cache("lesson_")
     async def delete_instance(
         self, instance: LessonTask, session: AsyncSession, no_commit: bool=False
     ) -> None:
