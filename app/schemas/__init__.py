@@ -21,6 +21,20 @@ from .course import (
     CoursePagedResponseSchema,
     PrivateResponseCourseSchema,
 )
+
+from .lesson import (
+    LessonSchema,
+    InputLessonSchema,
+    UpdateLessonSchema,
+    GetLessonSchema,
+)
+from .lesson_task import (
+    LessonTaskSchema,
+    InputLessonTaskSchema,
+    UpdateLessonTaskSchema,
+)
 from .other import (
-    PagedResponseSchema, S3LinkResponse
+    FullTaskMaterial,
+    PagedResponseSchema,
+    SerializeMaterial,
 )

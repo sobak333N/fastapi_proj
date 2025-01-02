@@ -7,11 +7,14 @@ from app.services.base_service import BaseService
 from app.repositories import InstructorRepository, UserRepository
 from app.repositories.user import RedisUser
 from app.models import User, Instructor
-from app.schemas import ShortInstructorResponse, UpdateInstructorResponse
+from app.schemas import (
+    ShortInstructorResponse, UpdateInstructorResponse, 
+    InstructorResponse,
+)
 from app.errors import InstanceDoesntExists
 
 
-class InstructorService(BaseService):
+class InstructorService(BaseService[Instructor]):
     def __init__(self):
         super().__init__(InstructorRepository, "Instructor")
         self.user_repository = UserRepository()
@@ -30,7 +33,7 @@ class InstructorService(BaseService):
         instructor_model: UpdateInstructorResponse, 
         user: User, 
         session: AsyncSession
-    ) -> Any:
+    ) -> InstructorResponse:
         excluded_fields = set([
             field for field, value in UpdateInstructorResponse.model_config["fields"].items()
             if value.get("exclude", False) is True 

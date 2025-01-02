@@ -57,7 +57,7 @@ async def delete_course(
     user: User=Depends(get_current_user),
     permission: bool=Depends(RoleChecker([Roles2.instructor])),
 ):
-    return await course_service.delete_instance(user.instructor.instructor_id, course_id, session)
+    return await course_service.delete_instance(user, course_id, session)
 
 
 @course_router.post("/", status_code=status.HTTP_200_OK, response_model=CoursePagedResponseSchema)

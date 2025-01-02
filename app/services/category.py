@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.base_service import BaseService
 from app.repositories import CategoryRepository, RedisPaged
+from app.models import Category
 
 
-class CategoryService(BaseService):
+class CategoryService(BaseService[Category]):
+# class CategoryService(BaseService):
     def __init__(self):
         super().__init__(CategoryRepository, "Category")
 

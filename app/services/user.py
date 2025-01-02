@@ -31,7 +31,7 @@ from app.errors import (
 
 
 
-class UserService(BaseService):
+class UserService(BaseService[User]):
 
     def __init__(self):
         super().__init__(UserRepository, "User")

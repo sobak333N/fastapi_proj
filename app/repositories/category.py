@@ -9,7 +9,7 @@ from app.config import Config
 from app.repositories.redis import RedisPaged
 
 
-class CategoryRepository(BaseRepository):
+class CategoryRepository(BaseRepository[Category]):
     def __init__(self):
         super().__init__(Category)
 

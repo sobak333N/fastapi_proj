@@ -1,4 +1,7 @@
-from typing import Type, TypeVar, Any, Optional, List
+from typing import (
+    Type, TypeVar, Any, 
+    Optional, List, Generic,
+)
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import class_mapper
@@ -12,8 +15,10 @@ from app.config import Config
 
 
 T = TypeVar('T')
+D = TypeVar('D')
 
-class BaseRepository:
+
+class BaseRepository(Generic[T]):
     def __init__(self, model: Type[T]):
         self.model = model
         mapper = class_mapper(self.model)
@@ -56,12 +61,12 @@ class BaseRepository:
         result = await session.execute(statement)
         return result.scalars().all()
 
-    async def get_total_count(self, session: AsyncSession) -> List[T]:
+    async def get_total_count(self, session: AsyncSession) -> int:
         statement = select(func.count()).select_from(self.model)
         result = await session.execute(statement)
         return result.scalar()
 
-    async def create_instance(self, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
+    async def create_instance(self, session: AsyncSession, no_commit: bool=False, **kwargs) -> T:
         new_instance = self.model(**kwargs)
         session.add(new_instance)
         if not no_commit:
@@ -92,7 +97,9 @@ class BaseRepository:
             return updated_instance
         return None
     
-    async def update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
+    async def update_instance(
+        self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs
+    ) -> T:
         for attr, value in kwargs.items():
             setattr(instance, attr, value)
         if not no_commit:
@@ -100,7 +107,9 @@ class BaseRepository:
         return instance
 
 
-    async def raw_update_instance(self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs) -> Optional[T]:
+    async def raw_update_instance(
+        self, instance: T, session: AsyncSession, no_commit: bool=False, **kwargs
+    ) -> Optional[T]:
         values = {
             key: value
             for key, value in instance.__dict__.items()
@@ -122,7 +131,15 @@ class BaseRepository:
         return updated_instance
 
 
-    async def delete_instance(self, instance: T , session: AsyncSession, no_commit: bool=False) -> None:
+    async def delete_instance(
+        self, instance: T , session: AsyncSession, no_commit: bool=False
+    ) -> None:
         await session.delete(instance)
         if not no_commit:
             await session.commit()
+
+
+class DocumentRepository(Generic[T, D], BaseRepository[T]):
+    def __init__(self, model: Type[T], document_model: Type[D]):
+        super().__init__(model)
+        self.document_model = document_model

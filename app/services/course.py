@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 from fastapi.encoders import jsonable_encoder
@@ -13,7 +13,7 @@ from app.errors import InsufficientPermission
 from app.base_responses import BaseSuccessResponse
 
 
-class CourseService(BaseService):
+class CourseService(BaseService[Course]):
     def __init__(self):
         self.category_service = CategoryService()
         super().__init__(CourseRepository, "Course")
@@ -22,19 +22,21 @@ class CourseService(BaseService):
         await self.category_service.instance_exists(course_pydatinc_model.category_id, session)
         return await super().create_instance(course_pydatinc_model, session)
 
+    async def handling_valid_instructor(self, course_id: int, user: User, session: AsyncSession) -> Optional[Course]:
+        instance = await super().get_instance_by_pk(course_id, session)
+        if instance.instructor_id != user.instructor.instructor_id:
+            raise InsufficientPermission()
+        return instance
+
     async def patch_instance(self, course_id: int, user: User, course_pydatinc_model: BaseModel, session: AsyncSession):
         await self.category_service.instance_exists(course_pydatinc_model.category_id, session)
-        instance = await self.get_instance_by_pk(course_id, user, session)
-        if instance.instructor_id != course_pydatinc_model.instructor_id:
-            raise InsufficientPermission()
+        instance = await self.handling_valid_instructor(course_id, user, session)
         instance_data = jsonable_encoder(course_pydatinc_model)
         patched_instance = await self.repository.update_instance(instance, session, **instance_data)
         return patched_instance
     
-    async def delete_instance(self, instructor_id: int, user: User, course_id: int, session: AsyncSession):
-        instance = await self.get_instance_by_pk(course_id, user, session)
-        if instance.instructor_id != instructor_id:
-            raise InsufficientPermission()
+    async def delete_instance(self, user: User, course_id: int, session: AsyncSession):
+        instance = await self.handling_valid_instructor(course_id, user, session)
         await self.repository.delete_instance(instance, session)
         return BaseSuccessResponse(message=f"{self.model_name} was deleted")
     
@@ -54,9 +56,7 @@ class CourseService(BaseService):
     async def get_instance_by_pk(self, pk: int, user: User, session: AsyncSession):
         course = await super().get_instance_by_pk(pk, session)
         access = await self.check_access_to_course(course, user, session)
-        print(access)
         if not access:
-            print("NO ACCESS")
             delattr(course, 'private_info')
         return course
     
@@ -67,7 +67,7 @@ class CourseService(BaseService):
                     return False
             elif user.role == Roles2.student:
                 student_access = await self.repository.check_access_of_user(
-                    course=course, 
+                    course_id=course.course_id, 
                     student_id=user.student.student_id, 
                     session=session,
                 )

@@ -8,7 +8,7 @@ from app.repositories.user import BaseUserRepository
 from app.models import Instructor
 
 
-class InstructorRepository(BaseUserRepository):
+class InstructorRepository(BaseUserRepository[Instructor]):
     def __init__(self):
         super().__init__(Instructor)
     

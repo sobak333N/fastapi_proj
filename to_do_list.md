@@ -1,2 +1,2 @@
-1) lessons field in course
-2) clear user, instructor cache
+1) redis ON course
+2) NEED TO FIX DELETE COURSE!!!!!!!!
