@@ -67,8 +67,12 @@ class StudentCourse(Base):
     __tablename__ = 'student_course'
     student_course_id = Column(Integer, primary_key=True)
 
-    course_id = Column(Integer, ForeignKey('course.course_id'))
-    student_id = Column(Integer, ForeignKey('students.student_id'))
+    course_id = Column(
+        Integer, ForeignKey('course.course_id', ondelete='SET NULL'), nullable=True
+    )
+    student_id = Column(
+        Integer, ForeignKey('students.student_id', ondelete='SET NULL'), nullable=True
+    )
     payment_type = Column(Enum(PaymentType))
     payment_status = Column(Enum(PaymentStatus))
     progress = Column(Float, nullable=True)

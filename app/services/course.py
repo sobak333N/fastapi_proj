@@ -35,7 +35,7 @@ class CourseService(BaseService[Course]):
         patched_instance = await self.repository.update_instance(instance, session, **instance_data)
         return patched_instance
     
-    async def delete_instance(self, instructor_id: int, user: User, course_id: int, session: AsyncSession):
+    async def delete_instance(self, user: User, course_id: int, session: AsyncSession):
         instance = await self.handling_valid_instructor(course_id, user, session)
         await self.repository.delete_instance(instance, session)
         return BaseSuccessResponse(message=f"{self.model_name} was deleted")

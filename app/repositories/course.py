@@ -2,9 +2,13 @@ from typing import List
 
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from beanie.operators import In
 
 from .base_repository import BaseRepository
-from app.models import Course, User, StudentCourse
+from app.models import (
+    Course, User, StudentCourse,
+    Lesson, LessonDocument, LessonTaskDocument,
+)
 from app.models.course import PaymentStatus
 from app.config import Config
 
@@ -48,4 +52,22 @@ class CourseRepository(BaseRepository[Course]):
         if not result or result.payment_status != PaymentStatus.done:
             return False
         return True
-        
+    
+    async def delete_instance(
+        self, instance: Course, session: AsyncSession, no_commit: bool=False
+    ) -> None:
+        statement = (
+            select(Lesson.lesson_id)
+            .where(Lesson.course_id == instance.course_id)
+        )
+        lessons = await session.execute(statement)
+        lesson_ids = [row.lesson_id for row in lessons.fetchall()]
+
+        await LessonDocument.find(
+            In(LessonDocument.lesson_id, lesson_ids)
+        ).delete_many()
+        await LessonTaskDocument.find(
+            In(LessonTaskDocument.lesson_id, lesson_ids)
+        ).delete_many()
+
+        return await super().delete_instance(instance, session, no_commit)
