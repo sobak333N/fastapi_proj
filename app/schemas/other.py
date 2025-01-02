@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from pydantic_core import PydanticCustomError
 from fastapi.encoders import jsonable_encoder
 
-from app.schemas.lesson_task import LessonTaskSchema
+from app.schemas.lesson_task import LessonTaskSchema, StudentLessonTaskSchema
 
 
 class MaterialType(PyEnum):
@@ -48,7 +48,7 @@ class TaskMaterial(BaseMaterial):
 
 class FullTaskMaterial(BaseMaterial):
     type: MaterialType = MaterialType.lesson_task
-    lesson_task: LessonTaskSchema
+    lesson_task: Union[LessonTaskSchema, StudentLessonTaskSchema]
 
 
 class PagedResponseSchema(BaseModel):
@@ -57,9 +57,11 @@ class PagedResponseSchema(BaseModel):
     count_on_page: int
     total_count: int
     
+    
 class S3LinkResponse(BaseModel):
     message: str=Field(default="File was successfully uploaded")
     link: str=Field(..., description="link in s3 storage")
+
 
 class SerializeMaterial:
     material_type_dict: Dict[MaterialType, Type[BaseMaterial]] = {

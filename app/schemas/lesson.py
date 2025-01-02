@@ -2,12 +2,14 @@ from typing import Union, List
 import copy
 
 from pydantic import BaseModel, Field, model_validator
+from fastapi.encoders import jsonable_encoder
 
 from app.schemas.other import (
     TextMaterial, ImageMaterial, VideoMaterial, 
     FormulaMaterial, TaskMaterial, SerializeMaterial,
     FullTaskMaterial
 )
+from app.schemas.lesson_task import StudentLessonTaskSchema
 
 
 InputLessonSchema_model_config = {
@@ -94,3 +96,13 @@ class GetLessonSchema(LessonSchema):
             for material in model.materials
         ]
         return model
+    
+    def exclude_answers_for_students(self, is_student: bool):
+        if is_student:
+            for material in self.materials:
+                if isinstance(material, FullTaskMaterial):
+                    material.lesson_task = StudentLessonTaskSchema(
+                        **jsonable_encoder(material.lesson_task)
+                    )
+                    material.lesson_task.answer = None
+        return self

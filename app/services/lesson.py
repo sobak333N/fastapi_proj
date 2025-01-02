@@ -88,4 +88,6 @@ class LessonService(BaseService[Lesson]):
             )
             if not student_access:
                 raise InsufficientPermission()
-        return await self.repository.get_document_by_pk(pk, lesson, session)
+        lesson_document = await self.repository.get_document_by_pk(pk, lesson, session)
+        lesson_document.exclude_answers_for_students(bool(user.role == Roles2.student))
+        return lesson_document

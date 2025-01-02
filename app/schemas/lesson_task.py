@@ -41,10 +41,10 @@ class InputLessonTaskSchema(BaseModel):
     model_config = InputLessonTaskSchema_model_config
     
     @model_validator(mode="after")
-    def validate_options_depends_on_task_type(cls, values):
-        task_type = values.task_type
-        options = values.options
-        answer = values.answer
+    def validate_options_depends_on_task_type(cls, model):
+        task_type = model.task_type
+        options = model.options
+        answer = model.answer
         
         if task_type == TaskTypeEnum.assignment and options is not None:
             raise PydanticCustomError(
@@ -65,7 +65,7 @@ class InputLessonTaskSchema(BaseModel):
                     "answer must be in options", 
                     {"input": answer, "expected": f"answer include from {options}"}
                 )
-        return values        
+        return model        
 
 
 class LessonTaskSchema(InputLessonTaskSchema):
@@ -73,6 +73,12 @@ class LessonTaskSchema(InputLessonTaskSchema):
 
     model_config = LessonTaskSchema_model_config
 
-
+class StudentLessonTaskSchema(LessonTaskSchema):
+    answer: Optional[str] = Field(exclude=True, default=None)
+    
+    @model_validator(mode="after")
+    def validate_options_depends_on_task_type(cls, model):
+        return model
+    
 class UpdateLessonTaskSchema(InputLessonTaskSchema):
     pass
