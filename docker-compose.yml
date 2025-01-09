@@ -79,10 +79,10 @@ services:
       sleep 1 &&
       if [ \"$TESTING\" = \"TRUE\" ]; then
         alembic upgrade head &&
-        pytest --disable-warnings --maxfail=1 --tb=short  
+        pytest --disable-warnings --maxfail=1 --tb=short
       elif [ \"$TESTING\" = \"LOGS\" ]; then
         alembic upgrade head &&
-        pytest -s --maxfail=1 --tb=short 
+        pytest -s --maxfail=1 --tb=short
       else
         echo 'TESTING=FALSE'
       fi
@@ -99,6 +99,8 @@ services:
       - ${MONGO_OUTER_PORT}:${MONGO_INNER_PORT}
     networks:
       - app-network
+    logging:
+      driver: "none"
 
 volumes:
   db_data:

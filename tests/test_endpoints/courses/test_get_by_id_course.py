@@ -1,3 +1,4 @@
+from typing import Literal
 from httpx import AsyncClient, Cookies
 import pytest
 import asyncio
@@ -7,20 +8,24 @@ from tests.conftest import signup_instructor_data, logger
 from tests.utils import sign_in, sign_out
 
 
-# @pytest.mark.skip(reason="temporary")
-@pytest.mark.asyncio
+
+
+@pytest.mark.anyio
 @pytest.mark.parametrize(
     "test_data",
     [
         ("credentials", "get_course_by_id")
     ]
 )
-async def test_get_by_id_course(test_data, request):
+async def test_get_by_id_course(test_data: Literal['credentials'], credentials, get_course_by_id):
     async with AsyncClient(base_url="http://nginx/api/v1", cookies=Cookies()) as async_client:
-        credentials = request.getfixturevalue("credentials")
-        course_data = await request.getfixturevalue("get_course_by_id")
-        logger.critical(course_data)
+        logger.critical(get_course_by_id)
         logger.critical("END")
+        # Продолжайте написание теста
+        # Например:
+        # response = await async_client.get(f"/courses/{get_course_by_id['course_id']}")
+        # assert response.status_code == 200
+
         # endpoint = post_course_data["endpoint"]
 
 
@@ -29,9 +34,9 @@ async def test_get_by_id_course(test_data, request):
         # logger.critical(f"{res=}")
 
 
-        student_valid_payload = credentials["valid"]["student3"]
-        await asyncio.sleep(2)
-        refresh_token, access_token = await sign_in(student_valid_payload, async_client)
+        # student_valid_payload = credentials["valid"]["student3"]
+        # await asyncio.sleep(2)
+        # refresh_token, access_token = await sign_in(student_valid_payload, async_client)
 
         # response = await async_client.post(
         #     endpoint, 
