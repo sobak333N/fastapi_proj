@@ -21,4 +21,15 @@ VALUES
 (5, 'free', 'visual'),
 (6, 'free', 'visual');
 
+INSERT INTO category (category_name, category_description, keywords)
+VALUES 
+('category1', 'category1_desc', 'category1_keywords');
 
+INSERT INTO course (instructor_id, category_id, course_name, cost, difficulty, private_info)
+VALUES
+(1, 1, 'course1', 2000, 'easy', 'private_info1');
+
+INSERT INTO student_course (course_id, student_id, payment_type, payment_status, progress, finished, start_date, end_date)
+VALUES 
+(1, 1, 'card', 'in_progress', NULL, NULL, NULL, NULL),
+(1, 2, 'card', 'done', NULL, NULL, NULL, NULL);

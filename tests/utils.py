@@ -22,3 +22,20 @@ async def sign_out(refresh_token: str, access_token: str, async_client: AsyncCli
         cookies={"refresh_token": refresh_token},
     )
     assert response.status_code == 200
+
+
+async def private_info(credentials_dict, endpoint: str, has_access, async_client):
+    refresh_token, access_token = await sign_in(credentials_dict, async_client)
+    response = await async_client.get(
+        endpoint, 
+        cookies={"refresh_token": refresh_token},
+        headers={"Authorization": access_token},
+    )
+    assert response.status_code == 200
+    response_json = response.json()
+    if has_access:
+        assert response_json.get("private_info", None) is not None
+    else:
+        assert response_json.get("private_info", None) is None
+
+    await sign_out(refresh_token, access_token, async_client)

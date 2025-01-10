@@ -57,6 +57,7 @@ async def create_student(
     user_data: StudentCreateModel,
     session: AsyncSession=Depends(get_db)
 ):
+    print(user_data)
     return await auth_service.signup(user_data, session)
 
 

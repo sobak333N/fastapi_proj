@@ -1,3 +1,5 @@
 {
-    "database_enviroment_path": "course/course_get_by_id.sql"
+    "database_enviroment_path": "course/course_get_by_id.sql",
+    "endpoint": "course/get/",
+    "course_id": 1
 }

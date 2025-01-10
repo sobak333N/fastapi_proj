@@ -11,7 +11,8 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.db import Base
 from app.models import(
-    User, Student, Instructor
+    User, Student, Instructor,
+    Course, StudentCourse, 
 )
 
 

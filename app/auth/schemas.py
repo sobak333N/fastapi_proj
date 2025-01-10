@@ -84,6 +84,7 @@ class UserCreateModel(BaseModel):
                 f"{info.field_name} cannot be empty or only whitespace", 
                 {"input": value, "expected": "non empty"}
             )
+        return value
 
     @field_validator("role")
     def validate_role(cls, role: str):
