@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 
 RUN pip install --upgrade pip
 
