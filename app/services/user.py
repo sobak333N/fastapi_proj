@@ -130,7 +130,7 @@ class UserService(BaseService[User]):
     async def marking_tokens_as_expired(
         self, 
         refresh_token_data: dict,
-        access_token_data: str,
+        access_token_data: dict,
         session: AsyncSession,        
     ) -> None:
         await self.repository.remove_refresh_token(refresh_token_data["token"], session)

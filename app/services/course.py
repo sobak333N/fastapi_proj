@@ -59,7 +59,7 @@ class CourseService(BaseService[Course]):
         return bool(await super().get_instance_by_pk(pk, session))
 
     async def get_instance_by_pk(
-        self, pk: int, user: User, session: AsyncSession
+        self, pk: int, user: User|None, session: AsyncSession
     ) -> Union[PrivateResponseCourseSchema, FullResponseCourseSchema]:
         async with get_session() as course_session, get_session() as lesson_session:
             async def get_course(self):
@@ -80,7 +80,7 @@ class CourseService(BaseService[Course]):
                 lessons=lessons
             )
     
-    async def check_access_to_course(self, course: Course, user: User, session: AsyncSession) -> bool:
+    async def check_access_to_course(self, course: Course, user: User|None, session: AsyncSession) -> bool:
         if user:
             if user.role == Roles2.instructor:
                 if course.instructor_id != user.instructor.instructor_id:

@@ -47,13 +47,12 @@ class FingerPrint:
         return {"user_agent": user_agent, "ip": ip}
 
 
-class AccessTokenDepends(HTTPBearer):
-    def __init__(self, auto_error: bool=True, required_auth: bool=True):
-        self.required_auth = required_auth
+class AccessTokenDependsForRequirement(HTTPBearer):
+    def __init__(self, auto_error: bool=True):
         return super().__init__(auto_error=auto_error)
     
     async def __call__(
-        self, 
+        self,
         request: Request,
     ) -> Optional[HTTPAuthorizationCredentials]:
         creds = await super().__call__(request)
@@ -61,20 +60,35 @@ class AccessTokenDepends(HTTPBearer):
             return None
         token = creds.credentials
         token_data = decode_token(token)
+        await self.__validate_access_token(token_data)
+        return token_data
+
+    async def __validate_access_token(self, token_data):
         if token_data is None:
-            return self._raise_access_token_required() if self.required_auth else None
+            return self._raise_access_token_required()
         #  redis check jti
         token_in_blocklist = await user_service.token_in_blocklist(token_data["jti"])
         if token_in_blocklist:
-            return self._raise_access_token_required() if self.required_auth else None
+            return self._raise_access_token_required()
         if token_data["refresh"] is True:
-            return self._raise_access_token_required() if self.required_auth else None
+            return self._raise_access_token_required()
         if datetime.fromtimestamp(token_data["exp"]) < datetime.now():
-            return self._raise_access_token_required() if self.required_auth else None
-        return token_data
+            return self._raise_access_token_required()
 
     def _raise_access_token_required(self):
         raise AccessTokenRequired()
+    
+
+class AccessTokenDependsForNotRequired(HTTPBearer):
+    def __init__(self, auto_error: bool=True):
+        self.required_auth = required_auth
+        return super().__init__(auto_error=auto_error)
+    
+    async def __call__(
+        self,
+        request: Request,
+    ) -> Optional[HTTPAuthorizationCredentials]:
+        return None
 
 
 class RefreshTokenDepends:
@@ -116,11 +130,15 @@ async def get_current_user(
 
 
 async def not_required_get_current_user(
-    token_details: dict = Depends(AccessTokenDepends(auto_error=False, required_auth=False)),
+    token_details: dict = Depends(AccessTokenDependsForNotRequired())),
     session: AsyncSession = Depends(get_db),
 ) -> Optional[User]:    
-    if not token_details:
+    try:
+        token_details: dict = Depends(AccessTokenDepends(auto_error=False, required_auth=False)),
+    except AccessTokenRequired:
         return None
+    # if not token_details:
+    #     return None
     user_email = token_details["user"]["email"]
     user = await user_repository.get_user_by_email(user_email, session)
     return user

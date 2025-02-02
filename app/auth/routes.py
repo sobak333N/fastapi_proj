@@ -70,9 +70,13 @@ async def create_instructor(
 
 
 @auth_router.get("/verify/{token}", response_model=UserResponse)
-async def verify_user_account(token: str, session: AsyncSession=Depends(get_db)):
+async def verify_user_account(
+    token: str, 
+    session: AsyncSession=Depends(get_db),
+    finger_print_data: dict=Depends(FingerPrint()),
+):
     new_user = await user_service.accept_register(token, session)
-    response = await auth_service.create_auth_response(new_user, session)
+    response = await auth_service.create_auth_response(new_user, finger_print_data, session)
     return response
 
 

@@ -1,11 +1,11 @@
 INSERT INTO users (email, first_name, second_name, last_name, birthdate, password_hash,created_at, role)
 VALUES
-('student1@ya.ru', 'John', 'A.', 'Doe', '1990-01-01', 'Q1w2e3r4-',NOW() , 'student'),
-('student2@ya.ru', 'Jane', 'B.', 'Smith', '1992-02-02', 'Q1w2e3r4-',NOW() , 'student'),
-('instructor1@ya.ru', 'Peter', 'C.', 'Parker', '1985-03-03', 'Q1w2e3r4-', NOW() , 'instructor'),
-('instructor2@ya.ru', 'Tony', 'D.', 'Stark', '1975-04-04', 'Q1w2e3r4-', NOW() , 'instructor'),
-('student3@ya.ru', 'Natasha', 'E.', 'Romanoff', '1988-05-05', 'Q1w2e3r4-', NOW() , 'student'),
-('student4@ya.ru', 'Bruce', 'F.', 'Banner', '1980-06-06', 'Q1w2e3r4-', NOW() , 'instructor');
+('student1@ya.ru', 'John', 'A.', 'Doe', '1990-01-01', '$2b$12$oUNO9kN6S4F9kIYKnNLQV.xc7vaSmKlwWwmS579.5f59dn7ZPzjVG',NOW() , 'student'),
+('student2@ya.ru', 'Jane', 'B.', 'Smith', '1992-02-02', '$2b$12$oUNO9kN6S4F9kIYKnNLQV.xc7vaSmKlwWwmS579.5f59dn7ZPzjVG',NOW() , 'student'),
+('instructor1@ya.ru', 'Peter', 'C.', 'Parker', '1985-03-03', '$2b$12$oUNO9kN6S4F9kIYKnNLQV.xc7vaSmKlwWwmS579.5f59dn7ZPzjVG', NOW() , 'instructor'),
+('instructor2@ya.ru', 'Tony', 'D.', 'Stark', '1975-04-04', '$2b$12$oUNO9kN6S4F9kIYKnNLQV.xc7vaSmKlwWwmS579.5f59dn7ZPzjVG', NOW() , 'instructor'),
+('student3@ya.ru', 'Natasha', 'E.', 'Romanoff', '1988-05-05', '$2b$12$oUNO9kN6S4F9kIYKnNLQV.xc7vaSmKlwWwmS579.5f59dn7ZPzjVG', NOW() , 'student'),
+('student4@ya.ru', 'Bruce', 'F.', 'Banner', '1980-06-06', '$2b$12$oUNO9kN6S4F9kIYKnNLQV.xc7vaSmKlwWwmS579.5f59dn7ZPzjVG', NOW() , 'instructor');
 
 
 INSERT INTO instructors (user_id, education, academic_degree, academical_experience, "H_index")
